@@ -40,6 +40,12 @@ const CASES: [string, string, number][] = [
   ['what games has he made?', 'projects/pixel-souls#0', 3],
   ['where does he work now?', 'experience/ericsson#0', 5],
   ['what did he do before Ericsson?', 'experience/codehall#0', 5],
+  // Contact details are only answerable because profile is a content
+  // collection rather than markup in index.astro.
+  ['how do I contact him?', 'profile/index#0', 3],
+  ['what is his email?', 'profile/index#0', 3],
+  ['who is Aryan Kapoor?', 'profile/index#0', 3],
+  ['where is he based?', 'profile/index#0', 3],
 ];
 
 for (const [query, expectedId, maxRank] of CASES) {

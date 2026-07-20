@@ -17,6 +17,31 @@ const base = {
   draft: z.boolean().default(false),
 };
 
+/**
+ * Identity and contact details. A collection rather than constants in the page
+ * so the chat can answer "how do I contact him?" — details living only in page
+ * markup never reach the search index.
+ */
+const profile = defineCollection({
+  loader: md('profile'),
+  schema: z.object({
+    ...base,
+    name: z.string(),
+    /** One line under the name. */
+    tagline: z.string(),
+    location: z.string().optional(),
+    email: z.string().optional(),
+    links: z
+      .array(z.object({ label: z.string(), url: z.string().url() }))
+      .default([]),
+    /**
+     * Path to a .glb under `src/assets/`, relative to this file. Omit and the
+     * hero simply renders without an avatar — nothing else changes.
+     */
+    avatar: z.string().optional(),
+  }),
+});
+
 /** Free-form prose sections rendered as a single block (About, Interests). */
 const prose = defineCollection({
   loader: md('about'),
@@ -71,17 +96,26 @@ const experience = defineCollection({
 
 const projects = defineCollection({
   loader: md('projects'),
-  schema: z.object({
-    ...base,
-    title: z.string(),
-    blurb: z.string(),
-    stack: z.array(z.string()).default([]),
-    repo: z.string().url().optional(),
-    demo: z.string().url().optional(),
-    year: z.string().optional(),
-    featured: z.boolean().default(false),
-    order: z.number().default(0),
-  }),
+  // Function form so `image()` is available: it validates the file exists at
+  // build time and hands the page a processed asset (WebP/AVIF, srcset,
+  // intrinsic dimensions) instead of a bare string path.
+  schema: ({ image }) =>
+    z.object({
+      ...base,
+      title: z.string(),
+      blurb: z.string(),
+      /** Card and page hero. Omit and a generated placeholder renders instead. */
+      cover: image().optional(),
+      gallery: z
+        .array(z.object({ src: image(), alt: z.string() }))
+        .default([]),
+      stack: z.array(z.string()).default([]),
+      repo: z.string().url().optional(),
+      demo: z.string().url().optional(),
+      year: z.string().optional(),
+      featured: z.boolean().default(false),
+      order: z.number().default(0),
+    }),
 });
 
 const skills = defineCollection({
@@ -127,6 +161,7 @@ const education = defineCollection({
 });
 
 export const collections = {
+  profile,
   about: prose,
   interests,
   experience,

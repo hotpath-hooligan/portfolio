@@ -1,0 +1,49 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  cover?: ImageMetadata;
+  title: string;
+  /** Rendered widths; the card and the detail hero want different sizes. */
+  widths?: number[];
+  class?: string;
+}
+
+const { cover, title, widths = [400, 800], class: className = '' } = Astro.props;
+
+/**
+ * Deterministic placeholder when a project has no cover yet. Derived from the
+ * title so each project keeps a stable colour across builds rather than
+ * flickering to a new one whenever content is reordered.
+ */
+const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+const initials = title
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((w) => w[0])
+  .join('')
+  .toUpperCase();
+---
+
+{
+  cover ? (
+    <Image
+      src={cover}
+      alt={`${title} screenshot`}
+      widths={widths}
+      sizes="(max-width: 640px) 100vw, 400px"
+      loading="lazy"
+      decoding="async"
+      class={`h-full w-full object-cover ${className}`}
+    />
+  ) : (
+    <div
+      class={`flex h-full w-full items-center justify-center ${className}`}
+      style={`background: linear-gradient(135deg, oklch(0.30 0.07 ${hue}), oklch(0.19 0.05 ${(hue + 40) % 360}))`}
+      aria-hidden="true"
+    >
+      <span class="text-2xl font-semibold tracking-tight text-white/60">{initials}</span>
+    </div>
+  )
+}

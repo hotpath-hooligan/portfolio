@@ -180,6 +180,37 @@ async function collectChunks(): Promise<Chunk[]> {
     );
   }
 
+  // --- Profile: identity and contact. -------------------------------------
+  // Indexed so "how do I get in touch" is answerable. Without this the details
+  // exist only in page markup and the chat cannot see them at all.
+  for (const p of await readCollection('profile')) {
+    const { name, tagline, location, email, links = [] } = p.data;
+    const contact = [
+      email ? `Email: ${email}.` : '',
+      ...links.map((l: any) => `${l.label}: ${l.url}.`),
+    ]
+      .filter(Boolean)
+      .join(' ');
+    chunks.push(
+      makeChunk(
+        'profile',
+        p.slug,
+        0,
+        name,
+        '/#top',
+        [
+          `${name} is a software engineer${location ? ` based in ${location}` : ''}.`,
+          tagline,
+          contact,
+          p.body,
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
+        'contact reach email hire linkedin github resume cv who is intro introduction about name based located location',
+      ),
+    );
+  }
+
   // --- About & interests: free prose, paragraph-packed. -------------------
   for (const a of await readCollection('about')) {
     splitProse(a.body).forEach((text, i) =>

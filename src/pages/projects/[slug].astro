@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
+import ProjectCover from '../../components/ProjectCover.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -62,10 +64,35 @@ const { Content } = await render(project);
       }
     </header>
 
+    <div class="mt-10 aspect-[16/9] w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+      <ProjectCover cover={project.data.cover} title={project.data.title} widths={[800, 1400]} />
+    </div>
+
     <div
-      class="mt-10 space-y-4 border-t border-slate-200 pt-10 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-400"
+      class="mt-10 space-y-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400"
     >
       <Content />
     </div>
+
+    {
+      project.data.gallery.length > 0 && (
+        <div class="mt-10 grid gap-4 sm:grid-cols-2">
+          {project.data.gallery.map((g) => (
+            <figure>
+              <Image
+                src={g.src}
+                alt={g.alt}
+                widths={[400, 800]}
+                sizes="(max-width: 640px) 100vw, 400px"
+                loading="lazy"
+                decoding="async"
+                class="w-full rounded-lg border border-slate-200 dark:border-slate-800"
+              />
+              <figcaption class="mt-2 text-xs text-slate-400 dark:text-slate-500">{g.alt}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )
+    }
   </main>
 </Layout>

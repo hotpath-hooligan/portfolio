@@ -3,10 +3,31 @@ import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Section from '../components/Section.astro';
 import { slugify } from '../lib/slug.ts';
+import ProjectCover from '../components/ProjectCover.astro';
+import Avatar from '../islands/Avatar.tsx';
+
+// Resolve the .glb referenced in profile frontmatter to a hashed build URL.
+// eager:false would hand back a loader function; we only need the URL string.
+const glbs = import.meta.glob<string>('../assets/**/*.glb', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
 
 const published = <T extends { data: { draft: boolean } }>(items: T[]) =>
   items.filter((i) => !i.data.draft);
 const byOrder = (a: any, b: any) => (b.data.order ?? 0) - (a.data.order ?? 0);
+
+const profile = published(await getCollection('profile'))[0];
+if (!profile) throw new Error('src/content/profile/index.md is required (and must not be draft)');
+const { name, tagline, email, links, avatar } = profile.data;
+
+// Frontmatter stores the path relative to the profile file; the glob keys are
+// relative to this page. Match on the filename, which is unambiguous here.
+const avatarUrl = avatar
+  ? Object.entries(glbs).find(([k]) => k.endsWith(avatar.replace(/^.*\//, '/')))?.[1]
+  : undefined;
+if (avatar && !avatarUrl) throw new Error(`profile.avatar not found in src/assets: ${avatar}`);
 
 const about = published(await getCollection('about'))[0];
 const AboutContent = about ? (await render(about)).Content : null;
@@ -21,30 +42,41 @@ const interests = published(await getCollection('interests')).sort(byOrder);
 
 <Layout>
   <main class="mx-auto max-w-3xl px-6 pb-32">
-    <header class="py-20">
-      <h1 class="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
-        Aryan Kapoor
-      </h1>
-      <p class="mt-3 max-w-xl text-lg text-slate-600 dark:text-slate-400">
-        Software engineer working on distributed backend systems — event-driven architecture,
-        service authorization, and the networking underneath both.
-      </p>
-      <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-        {
-          [
-            ['Email', 'mailto:aryan_kapoor@zohomail.in'],
-            ['GitHub', 'https://github.com/akap-hub'],
-            ['LinkedIn', 'https://www.linkedin.com/in/akap'],
-          ].map(([label, href]) => (
+    <header id="top" class="grid items-center gap-8 py-20 sm:grid-cols-[1fr_auto]">
+      <div>
+        <h1 class="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+          {name}
+        </h1>
+        <p class="mt-3 max-w-xl text-lg text-slate-600 dark:text-slate-400">{tagline}</p>
+        <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {email && (
             <a
-              href={href}
+              href={`mailto:${email}`}
               class="text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white"
             >
-              {label}
+              Email
             </a>
-          ))
-        }
+          )}
+          {links.map((l) => (
+            <a
+              href={l.url}
+              class="text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white"
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
       </div>
+
+      {
+        avatarUrl && (
+          <div class="order-first sm:order-last sm:w-64">
+            {/* client:only — the renderer touches window/WebGL, so there is no
+                meaningful server pass to hydrate from. */}
+            <Avatar client:only="react" src={avatarUrl} label={`3D avatar of ${name}`} />
+          </div>
+        )
+      }
     </header>
 
     {
@@ -106,19 +138,24 @@ const interests = published(await getCollection('interests')).sort(byOrder);
           projects.map((p) => (
             <a
               href={`/projects/${p.id}/`}
-              class="rounded-xl border border-slate-200 p-5 transition hover:border-slate-400 dark:border-slate-800 dark:hover:border-slate-600"
+              class="overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-400 dark:border-slate-800 dark:hover:border-slate-600"
             >
-              <h3 class="font-medium text-slate-900 dark:text-white">{p.data.title}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {p.data.blurb}
-              </p>
-              <ul class="mt-3 flex flex-wrap gap-1.5">
-                {p.data.stack.map((s) => (
-                  <li class="rounded border border-slate-200 px-1.5 py-0.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                    {s}
-                  </li>
-                ))}
-              </ul>
+              <div class="aspect-[16/9] w-full overflow-hidden border-b border-slate-200 dark:border-slate-800">
+                <ProjectCover cover={p.data.cover} title={p.data.title} />
+              </div>
+              <div class="p-5">
+                <h3 class="font-medium text-slate-900 dark:text-white">{p.data.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  {p.data.blurb}
+                </p>
+                <ul class="mt-3 flex flex-wrap gap-1.5">
+                  {p.data.stack.map((s) => (
+                    <li class="rounded border border-slate-200 px-1.5 py-0.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </a>
           ))
         }
