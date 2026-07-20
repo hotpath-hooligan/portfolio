@@ -52,6 +52,9 @@ async function main() {
   const browser: Browser = await puppeteer.launch({
     executablePath: CHROME,
     headless: true,
+    // E2E_PROFILE reuses a profile so cached weights survive between runs while
+    // iterating. Unset (the default) is the honest first-time-visitor test.
+    userDataDir: process.env.E2E_PROFILE,
     args: ['--no-sandbox', '--disable-dev-shm-usage'],
   });
   // A persistent context would let the Cache API survive, but a fresh profile
@@ -63,6 +66,7 @@ async function main() {
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => {
     if (m.type() === 'error') errors.push(m.text());
+    if (m.text().startsWith('[chat]')) console.log(`         ${m.text().slice(0, 200)}`);
   });
 
   let failed = false;
@@ -110,20 +114,40 @@ async function main() {
 
     console.log('\nTier 2 — on-device model (~140 MB, this takes a while)');
     await page.click('button ::-p-text(Enable AI)');
+    // Wait for the ready state, NOT for the "Enable AI" button to disappear:
+    // the progress bar replaces that button the instant the first byte lands,
+    // so the absence of that text means "download started", not "model ready".
+    // Waiting on it made every Tier 2 assertion run against an unloaded engine.
     await page.waitForFunction(
-      () => !document.body.textContent?.includes('Enable AI'),
+      () => document.body.textContent?.includes('Running offline on your device'),
       { timeout: 900_000, polling: 1000 },
     );
     const loadFailed = await page.$eval('body', (b) => b.textContent?.includes("Couldn't load"));
     check(!loadFailed, 'models downloaded and initialised');
     await shot(page, '03-model-loaded');
 
-    const t2 = await ask(page, 'what does he use for authorization?', 180_000);
-    check(t2.length > 0, 'Tier 2 generates an answer', t2.slice(0, 120));
+    // Asserting on answer text alone is not enough: the extractive fallback
+    // also mentions OPA, so a silently-not-generating build passed this before
+    // data-generated existed. Check the provenance flag explicitly.
+    const t2 = await ask(page, 'where did he go to college?', 180_000);
     check(
-      /OPA|policy|RBAC|permission/i.test(t2),
-      'generated answer is grounded in retrieved context',
+      /R\.?N\.?S|Institute of Technology/i.test(t2),
+      'Tier 2 answer is grounded in retrieved context',
       t2.slice(0, 120),
+    );
+    const wasGenerated = await page.$$eval('[data-role="assistant"]', (els) =>
+      els[els.length - 1]!.getAttribute('data-generated'),
+    );
+    check(wasGenerated === 'true', 'answer came from the model, not the snippet fallback');
+
+    // The gate must be doing its job: this question makes the model refuse, and
+    // the user should still get the correct extractive answer.
+    const gated = await ask(page, 'what does he use for authorization?', 180_000);
+    check(/OPA|policy|RBAC|permission/i.test(gated), 'gated fallback still answers', gated.slice(0, 90));
+    check(
+      !/does not (provide|contain|mention)/i.test(gated),
+      'model refusals never reach the user',
+      gated.slice(0, 90),
     );
     await shot(page, '04-tier2-answer');
 
@@ -134,8 +158,25 @@ async function main() {
     check(offlineHeading === 'Aryan Kapoor', 'site loads offline', String(offlineHeading));
 
     await openChat(page).catch(() => {});
-    const t3 = await ask(page, 'tell me about Remote Connect', 180_000).catch((e) => `ERROR: ${e}`);
-    check(/guacamole|remote|ssh|session/i.test(t3), 'chat answers with no network', t3.slice(0, 120));
+
+    // The weights must come back from the Cache API with no network at all.
+    // Waiting for ready here is what actually proves the offline claim — asking
+    // immediately would only prove the extractive path still works.
+    const reloadedReady = await page
+      .waitForFunction(() => document.body.textContent?.includes('Running offline on your device'), {
+        timeout: 120_000,
+        polling: 500,
+      })
+      .then(() => true)
+      .catch(() => false);
+    check(reloadedReady, 'models restored from cache with no network');
+
+    const t3 = await ask(page, 'where did he go to college?', 180_000).catch((e) => `ERROR: ${e}`);
+    check(/R\.?N\.?S|Institute of Technology/i.test(t3), 'chat answers with no network', t3.slice(0, 120));
+    const offlineGenerated = await page.$$eval('[data-role="assistant"]', (els) =>
+      els[els.length - 1]!.getAttribute('data-generated'),
+    );
+    check(offlineGenerated === 'true', 'model generates offline, not just retrieval');
     await shot(page, '05-offline');
 
     check(errors.length === 0, 'no console errors', errors.slice(0, 3).join(' | '));

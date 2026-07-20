@@ -16,6 +16,7 @@ import {
   type FeatureExtractionPipeline,
   type Text2TextGenerationPipeline,
 } from '@huggingface/transformers';
+import { cleanAnswer } from './postprocess.ts';
 
 // No local model server — everything comes from the HF CDN, then cache.
 env.allowLocalModels = false;
@@ -120,7 +121,9 @@ self.addEventListener('message', async (event: MessageEvent<WorkerRequest>) => {
           repetition_penalty: 1.15,
         });
         const text = (Array.isArray(out) ? out[0]?.generated_text : out?.generated_text) ?? '';
-        post({ type: 'done', id: msg.id, text: String(text).trim() });
+        // Strip the echoed "Answer:" label here so the quality gate on the main
+        // thread judges the answer, not the model's prompt mimicry.
+        post({ type: 'done', id: msg.id, text: cleanAnswer(String(text)) });
         break;
       }
     }

@@ -3,6 +3,7 @@ import { loadIndex, search, type SearchIndex } from '../lib/search/client.ts';
 import type { RankedResult } from '../lib/search/types.ts';
 import { ChatEngine, modelsCached, type LoadProgress } from '../lib/chat/engine.ts';
 import { buildPrompt, ungroundedReply } from '../lib/chat/prompt.ts';
+import { rejectAnswer, cleanAnswer, toSnippet } from '../lib/chat/postprocess.ts';
 
 /**
  * 117 MB of ONNX weights from the HF CDN plus ~24 MB of onnxruntime-web WASM
@@ -105,12 +106,26 @@ export default function Chat() {
           // Refuse at the retrieval layer rather than asking a 77M model to be
           // honest about context it was never given.
           text = ungroundedReply(results);
-        } else if (engine?.ready) {
-          text = await engine.generate(buildPrompt(q, results));
-          generated = true;
-          if (!text) text = ungroundedReply(results);
         } else {
-          text = results[0]!.chunk.text;
+          // The extractive answer is always computed and is always correct —
+          // it is quoted source text. Generation is an optional improvement on
+          // top, accepted only if it passes the quality gate.
+          const snippet = toSnippet(results[0]!.chunk.text);
+          text = snippet;
+          if (engine?.ready) {
+            const raw = await engine.generate(buildPrompt(q, results));
+            const rejected = rejectAnswer(raw);
+            // Logged, not silent: the gate discarding a good answer and the
+            // model never running look identical from the outside, and that
+            // ambiguity already hid one bug.
+            console.debug(`[chat] generated=${JSON.stringify(raw)} gate=${rejected ?? 'accepted'}`);
+            if (!rejected) {
+              text = cleanAnswer(raw);
+              generated = true;
+            }
+          } else {
+            console.debug('[chat] engine not ready — extractive answer');
+          }
         }
 
         setMessages((m) => [
@@ -232,6 +247,7 @@ function MessageBubble({ message }: { message: Message }) {
           styling and will churn, but the test must not churn with them. */}
       <div
         data-role="assistant"
+        data-generated={String(!!message.generated)}
         className="max-w-[92%] rounded-2xl rounded-bl-sm bg-slate-100 px-3 py-2 text-sm text-slate-800 dark:bg-slate-800 dark:text-slate-100"
       >
         {message.pending ? <Thinking /> : message.text}
