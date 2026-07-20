@@ -7,9 +7,11 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "tsx scripts/build-index.ts && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:index": "tsx scripts/build-index.ts",
+    "test": "tsx --test src/lib/**/*.test.ts scripts/**/*.test.ts"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.1",
