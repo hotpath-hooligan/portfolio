@@ -1,17 +1,202 @@
 ---
+import { getCollection, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Section from '../components/Section.astro';
+import { slugify } from '../lib/slug.ts';
 
+const published = <T extends { data: { draft: boolean } }>(items: T[]) =>
+  items.filter((i) => !i.data.draft);
+const byOrder = (a: any, b: any) => (b.data.order ?? 0) - (a.data.order ?? 0);
+
+const about = published(await getCollection('about'))[0];
+const AboutContent = about ? (await render(about)).Content : null;
+
+const experience = published(await getCollection('experience')).sort(byOrder);
+const projects = published(await getCollection('projects')).sort(byOrder);
+const skills = published(await getCollection('skills'))[0];
+const certifications = published(await getCollection('certifications')).sort(byOrder);
+const education = published(await getCollection('education')).sort(byOrder);
+const interests = published(await getCollection('interests')).sort(byOrder);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <main class="mx-auto max-w-3xl px-6 pb-32">
+    <header class="py-20">
+      <h1 class="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+        Aryan Kapoor
+      </h1>
+      <p class="mt-3 max-w-xl text-lg text-slate-600 dark:text-slate-400">
+        Software engineer working on distributed backend systems — event-driven architecture,
+        service authorization, and the networking underneath both.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        {
+          [
+            ['Email', 'mailto:aryan_kapoor@zohomail.in'],
+            ['GitHub', 'https://github.com/akap-hub'],
+            ['LinkedIn', 'https://www.linkedin.com/in/akap'],
+          ].map(([label, href]) => (
+            <a
+              href={href}
+              class="text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white"
+            >
+              {label}
+            </a>
+          ))
+        }
+      </div>
+    </header>
+
+    {
+      AboutContent && (
+        <Section id="about" title="About">
+          <div class="space-y-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            <AboutContent />
+          </div>
+        </Section>
+      )
+    }
+
+    <Section id="experience" title="Experience">
+      <div class="space-y-12">
+        {
+          experience.map((job) => (
+            <article id={slugify(job.data.company)} class="scroll-mt-20">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+                <h3 class="text-lg font-medium text-slate-900 dark:text-white">
+                  {job.data.company}
+                </h3>
+                <span class="text-xs tabular-nums text-slate-400 dark:text-slate-500">
+                  {job.data.start} — {job.data.end}
+                </span>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400">{job.data.role}</p>
+              <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                {job.data.summary}
+              </p>
+
+              <div class="mt-6 space-y-5 border-l border-slate-200 pl-5 dark:border-slate-800">
+                {job.data.highlights.map((h) => (
+                  <div id={slugify(h.name)} class="scroll-mt-20">
+                    <h4 class="text-sm font-medium text-slate-800 dark:text-slate-200">{h.name}</h4>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                      {h.detail}
+                    </p>
+                    {h.tech.length > 0 && (
+                      <ul class="mt-2 flex flex-wrap gap-1.5">
+                        {h.tech.map((t) => (
+                          <li class="rounded border border-slate-200 px-1.5 py-0.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                            {t}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section id="projects" title="Projects">
+      <div class="grid gap-4 sm:grid-cols-2">
+        {
+          projects.map((p) => (
+            <a
+              href={`/projects/${p.id}/`}
+              class="rounded-xl border border-slate-200 p-5 transition hover:border-slate-400 dark:border-slate-800 dark:hover:border-slate-600"
+            >
+              <h3 class="font-medium text-slate-900 dark:text-white">{p.data.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                {p.data.blurb}
+              </p>
+              <ul class="mt-3 flex flex-wrap gap-1.5">
+                {p.data.stack.map((s) => (
+                  <li class="rounded border border-slate-200 px-1.5 py-0.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </a>
+          ))
+        }
+      </div>
+    </Section>
+
+    {
+      skills && (
+        <Section id="skills" title="Skills">
+          <dl class="space-y-5">
+            {skills.data.groups.map((g) => (
+              <div class="grid gap-1 sm:grid-cols-[10rem_1fr] sm:gap-4">
+                <dt class="text-sm font-medium text-slate-800 dark:text-slate-200">{g.name}</dt>
+                <dd class="text-sm text-slate-600 dark:text-slate-400">{g.items.join(' · ')}</dd>
+              </div>
+            ))}
+          </dl>
+        </Section>
+      )
+    }
+
+    <Section id="certifications" title="Certifications">
+      <ul class="space-y-4">
+        {
+          certifications.map((c) => (
+            <li class="flex flex-wrap items-baseline justify-between gap-x-4">
+              <div>
+                <p class="text-sm font-medium text-slate-900 dark:text-white">{c.data.name}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                  {c.data.issuer}
+                  {c.data.credentialId && ` · ${c.data.credentialId}`}
+                </p>
+              </div>
+              <span class="text-xs tabular-nums text-slate-400 dark:text-slate-500">
+                {c.data.date}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </Section>
+
+    <Section id="education" title="Education">
+      <ul class="space-y-4">
+        {
+          education.map((e) => (
+            <li class="flex flex-wrap items-baseline justify-between gap-x-4">
+              <div>
+                <p class="text-sm font-medium text-slate-900 dark:text-white">
+                  {e.data.institution}
+                </p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{e.data.degree}</p>
+              </div>
+              <span class="text-xs tabular-nums text-slate-400 dark:text-slate-500">
+                {e.data.start} — {e.data.end}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </Section>
+
+    {
+      interests.length > 0 && (
+        <Section id="interests" title="Interests">
+          <div class="grid gap-4 sm:grid-cols-2">
+            {interests.map((i) => (
+              <div class="rounded-xl border border-slate-200 p-5 dark:border-slate-800">
+                <h3 class="text-sm font-medium text-slate-900 dark:text-white">
+                  {i.data.icon && <span class="mr-1.5">{i.data.icon}</span>}
+                  {i.data.title}
+                </h3>
+                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{i.data.label}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )
+    }
+  </main>
+</Layout>

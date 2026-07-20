@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import Chat from '../islands/Chat.tsx';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Aryan Kapoor · Software Engineer',
+  description = 'Backend and distributed systems engineer. Platform work at Ericsson, plus emulators and network stacks for fun.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body
+    class="bg-white text-slate-800 antialiased selection:bg-slate-900 selection:text-white dark:bg-slate-950 dark:text-slate-300"
+  >
+    <slot />
+    {/* The only hydrated component on the page. `client:idle` keeps it out of
+        the critical path — the portfolio content renders and is interactive as
+        static HTML before the chat bundle is even requested. */}
+    <Chat client:idle />
+
+    <script is:inline>
+      // Registered after load so it never competes with the first paint.
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {
+            /* Offline support is an enhancement; the site works without it. */
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

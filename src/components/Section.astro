@@ -1,0 +1,21 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  /** Optional short lead-in under the heading. */
+  lead?: string;
+}
+const { id, title, lead } = Astro.props;
+---
+
+<section id={id} class="scroll-mt-20 border-t border-slate-200 py-14 dark:border-slate-800">
+  <h2
+    class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500"
+  >
+    {title}
+  </h2>
+  {lead && <p class="mb-8 text-sm text-slate-500 dark:text-slate-400">{lead}</p>}
+  <div class:list={[!lead && 'mt-8']}>
+    <slot />
+  </div>
+</section>

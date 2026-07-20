@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "build:index": "tsx scripts/build-index.ts",
-    "test": "tsx --test src/lib/**/*.test.ts scripts/**/*.test.ts"
+    "test": "tsx --test src/lib/**/*.test.ts scripts/**/*.test.ts",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.1",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
+    "puppeteer-core": "^25.3.0",
     "tsx": "^4.23.1"
   }
 }

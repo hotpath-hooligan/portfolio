@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # Generated search index
 public/search/
+scratch/

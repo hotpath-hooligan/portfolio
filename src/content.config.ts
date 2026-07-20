@@ -1,7 +1,12 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-const md = (pattern: string) => glob({ pattern, base: './src/content' });
+/**
+ * Base is the collection's own directory, not `src/content`, so entry ids are
+ * bare slugs (`go-netstack`) rather than paths (`projects/go-netstack`) —
+ * otherwise `/projects/[slug]` builds as `/projects/projects/go-netstack`.
+ */
+const md = (dir: string) => glob({ pattern: '*.md', base: `./src/content/${dir}` });
 
 /**
  * Shared across every collection. Draft entries are skipped by both the page
@@ -14,7 +19,7 @@ const base = {
 
 /** Free-form prose sections rendered as a single block (About, Interests). */
 const prose = defineCollection({
-  loader: md('about/*.md'),
+  loader: md('about'),
   schema: z.object({
     ...base,
     title: z.string(),
@@ -25,7 +30,7 @@ const prose = defineCollection({
 });
 
 const interests = defineCollection({
-  loader: md('interests/*.md'),
+  loader: md('interests'),
   schema: z.object({
     ...base,
     title: z.string(),
@@ -37,7 +42,7 @@ const interests = defineCollection({
 });
 
 const experience = defineCollection({
-  loader: md('experience/*.md'),
+  loader: md('experience'),
   schema: z.object({
     ...base,
     company: z.string(),
@@ -65,7 +70,7 @@ const experience = defineCollection({
 });
 
 const projects = defineCollection({
-  loader: md('projects/*.md'),
+  loader: md('projects'),
   schema: z.object({
     ...base,
     title: z.string(),
@@ -80,7 +85,7 @@ const projects = defineCollection({
 });
 
 const skills = defineCollection({
-  loader: md('skills/*.md'),
+  loader: md('skills'),
   schema: z.object({
     ...base,
     title: z.string(),
@@ -95,7 +100,7 @@ const skills = defineCollection({
 });
 
 const certifications = defineCollection({
-  loader: md('certifications/*.md'),
+  loader: md('certifications'),
   schema: z.object({
     ...base,
     name: z.string(),
@@ -109,7 +114,7 @@ const certifications = defineCollection({
 });
 
 const education = defineCollection({
-  loader: md('education/*.md'),
+  loader: md('education'),
   schema: z.object({
     ...base,
     institution: z.string(),

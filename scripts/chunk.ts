@@ -6,14 +6,7 @@ export const TARGET_TOKENS = 160;
 export const MIN_TOKENS = 25;
 export const OVERLAP_TOKENS = 30;
 
-export function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
+export { slugify } from '../src/lib/slug.ts';
 
 /** Strip markdown syntax and HTML comments down to plain prose for embedding. */
 export function toPlainText(md: string): string {
