@@ -1,6 +1,14 @@
 /** Streaming client for the Modal chat API. */
 
-const API = import.meta.env.PUBLIC_CHAT_API ?? 'http://localhost:8000';
+/**
+ * The Modal endpoint. Derived from the workspace and app names, so it is stable
+ * across redeploys and known before the first one.
+ *
+ * Not a secret and not a build variable — it ships in this bundle either way.
+ * PUBLIC_CHAT_API overrides it when pointing the dev server at `modal serve`,
+ * which mints a temporary URL.
+ */
+const API = import.meta.env.PUBLIC_CHAT_API || 'https://pro-akapoor--portfolio-chat-web.modal.run';
 
 export interface Source {
   id: string;

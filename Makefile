@@ -1,6 +1,6 @@
 .PHONY: dev build preview deploy serve-backend
 
-# Site on http://localhost:4321. Needs PUBLIC_CHAT_API pointing at a backend.
+# Site on http://localhost:4321, talking to the deployed backend.
 dev:
 	npm run dev
 

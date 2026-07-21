@@ -6,13 +6,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  // Static output, served as plain files. SITE gives absolute URLs in the
-  // build; BASE is the subpath when deploying to a GitHub Pages project site.
-  //
-  // `||` rather than `??`: an unset GitHub Actions variable expands to an empty
-  // string, not undefined, and Astro rejects `site: ""` as an invalid URL.
-  site: process.env.SITE || undefined,
-  base: process.env.BASE || '/',
+  // Astro emits absolute asset URLs, so it has to be told the subpath it will
+  // be served from. `base` is the repo name because this is a GitHub *project*
+  // site; it would be '/' for hotpath-hooligan.github.io itself.
+  site: 'https://hotpath-hooligan.github.io',
+  base: '/portfolio/',
 
   integrations: [react()],
 

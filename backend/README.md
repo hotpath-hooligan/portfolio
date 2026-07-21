@@ -37,15 +37,18 @@ the image rather than downloaded on first request. Add or swap models in
 
 ## Deploy
 
+CI does this on every push that touches `backend/` or `src/content/`. By hand:
+
 ```sh
 pip install -r requirements.txt
 modal setup
-
-export CHAT_ALLOWED_ORIGINS='["https://your.site"]'
 modal deploy app.py
 ```
 
-The deploy prints the endpoint URL. Put it in the frontend's `PUBLIC_CHAT_API`.
+The endpoint URL is derived from the workspace and app names, so it is stable
+across redeploys: `https://<workspace>--portfolio-chat-web.modal.run`. The
+frontend hardcodes it in `src/lib/chat/client.ts`, and the CORS allowlist is
+`ALLOWED_ORIGINS` in `app.py`.
 
 `modal serve app.py` gives the same thing as a temporary deployment that
 reloads on edit.

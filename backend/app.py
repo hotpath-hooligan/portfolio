@@ -17,7 +17,6 @@ arrives as the *string* `'str'` and the deploy dies on a missing encoder.
 """
 
 import json
-import os
 from pathlib import Path
 
 import modal
@@ -27,21 +26,12 @@ from models import DEFAULT_KEY, MODELS, model_by_key
 APP_NAME = "portfolio-chat"
 REPO_ROOT = Path(__file__).parent.parent
 
-# Origins allowed to call the API. The site is static and public; this only
-# keeps other people's pages from spending your GPU budget.
-#
-# Read here at deploy time and baked into the image below, because this module
-# is imported again inside the container, where the deploying shell's
-# environment does not exist — reading it there would silently fall back to
-# localhost and block the real site.
-# `or` rather than a default: an unset GitHub Actions variable arrives as an
-# empty string, which would reach json.loads() in the container and fail on the
-# first request instead of here.
-ALLOWED_ORIGINS = os.environ.get("CHAT_ALLOWED_ORIGINS") or '["http://localhost:4321"]'
-
-# Parsed at deploy time purely to fail fast: a malformed value would otherwise
-# deploy cleanly and 500 on every chat request.
-json.loads(ALLOWED_ORIGINS)
+# Origins allowed to call the API. Not a secret — it comes straight back in a
+# CORS header — and it only keeps other people's pages from spending GPU budget.
+ALLOWED_ORIGINS = [
+    "https://hotpath-hooligan.github.io",
+    "http://localhost:4321",
+]
 
 app = modal.App(APP_NAME)
 
@@ -82,11 +72,7 @@ api_image = (
         "python-frontmatter==1.1.0",
         "huggingface_hub[hf_transfer]==0.35.3",
     )
-    .env({
-        "HF_HUB_ENABLE_HF_TRANSFER": "1",
-        "HF_HOME": HF_CACHE,
-        "CHAT_ALLOWED_ORIGINS": ALLOWED_ORIGINS,
-    })
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HOME": HF_CACHE})
     .add_local_python_source(*SOURCE, copy=True)
     .add_local_dir(REPO_ROOT / "src" / "content", "/srv/content", copy=True)
     .run_function(_build_index)
@@ -179,7 +165,7 @@ def web():
     api = FastAPI(title="portfolio-chat")
     api.add_middleware(
         CORSMiddleware,
-        allow_origins=json.loads(os.environ["CHAT_ALLOWED_ORIGINS"]),
+        allow_origins=ALLOWED_ORIGINS,
         allow_methods=["POST", "GET"],
         allow_headers=["content-type"],
     )

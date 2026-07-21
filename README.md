@@ -16,12 +16,12 @@ Content lives in `src/content/` as Markdown — see [CONTENT.md](CONTENT.md).
 
 ```sh
 npm install
-cp .env.example .env      # set PUBLIC_CHAT_API
 make dev                  # http://localhost:4321
 ```
 
-The chat needs a backend. Either point `PUBLIC_CHAT_API` at a deployed one, or
-run `make serve-backend` for a temporary Modal deployment that reloads on edit.
+The chat talks to the deployed backend by default. To work against a local
+one, run `make serve-backend` and put the temporary URL it prints in
+`PUBLIC_CHAT_API` — the only environment variable this project reads.
 
 ## Deploying
 
@@ -37,28 +37,18 @@ rebuilds the search index that is baked into its image.
 
 ### One-time setup
 
-1. **Modal.** `pip install modal && modal setup`, then create a token at
-   [modal.com/settings/tokens](https://modal.com/settings/tokens).
-2. **GitHub Pages.** Settings → Pages → Source: **GitHub Actions**.
-3. **Repository secrets** (Settings → Secrets and variables → Actions):
+1. **GitHub Pages.** Settings → Pages → Source: **GitHub Actions**.
+2. **Two repository secrets**, from [modal.com/settings/tokens](https://modal.com/settings/tokens):
 
-   | Secret | Value |
+   | Secret | |
    | --- | --- |
-   | `MODAL_TOKEN_ID` | from the Modal token |
-   | `MODAL_TOKEN_SECRET` | from the Modal token |
+   | `MODAL_TOKEN_ID` | Modal API token |
+   | `MODAL_TOKEN_SECRET` | Modal API token |
 
-4. **Repository variables**, same page:
-
-   | Variable | Value | Notes |
-   | --- | --- | --- |
-   | `SITE` | `https://hotpath-hooligan.github.io` | absolute site URL |
-   | `BASE` | `/portfolio/` | repo name; `/` only for a user site |
-   | `PUBLIC_CHAT_API` | `https://<workspace>--portfolio-chat-web.modal.run` | printed by the first deploy |
-   | `CHAT_ALLOWED_ORIGINS` | `["https://hotpath-hooligan.github.io"]` | JSON array; CORS allowlist |
-
-**Deploy the backend first** — it prints the endpoint URL that
-`PUBLIC_CHAT_API` needs, and that URL is baked into the site bundle at build
-time. Run `make deploy` locally once, set the variable, then let CI take over.
+That is the whole configuration. There are no repository variables: the site
+URL, the base path, the API endpoint and the CORS allowlist are all public
+values that never change, so they live in `astro.config.mjs`,
+`src/lib/chat/client.ts` and `backend/app.py` rather than in CI settings.
 
 No Hugging Face token is needed; all three model repos are public.
 
