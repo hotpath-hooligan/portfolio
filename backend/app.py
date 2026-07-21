@@ -34,7 +34,14 @@ REPO_ROOT = Path(__file__).parent.parent
 # is imported again inside the container, where the deploying shell's
 # environment does not exist — reading it there would silently fall back to
 # localhost and block the real site.
-ALLOWED_ORIGINS = os.environ.get("CHAT_ALLOWED_ORIGINS", '["http://localhost:4321"]')
+# `or` rather than a default: an unset GitHub Actions variable arrives as an
+# empty string, which would reach json.loads() in the container and fail on the
+# first request instead of here.
+ALLOWED_ORIGINS = os.environ.get("CHAT_ALLOWED_ORIGINS") or '["http://localhost:4321"]'
+
+# Parsed at deploy time purely to fail fast: a malformed value would otherwise
+# deploy cleanly and 500 on every chat request.
+json.loads(ALLOWED_ORIGINS)
 
 app = modal.App(APP_NAME)
 
