@@ -23,6 +23,8 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Generated search index
-public/search/
-scratch/
+
+# python
+__pycache__/
+*.pyc
+.venv/

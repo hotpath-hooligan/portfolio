@@ -33,6 +33,7 @@ const about = published(await getCollection('about'))[0];
 const AboutContent = about ? (await render(about)).Content : null;
 
 const experience = published(await getCollection('experience')).sort(byOrder);
+const stories = published(await getCollection('stories')).sort(byOrder);
 const projects = published(await getCollection('projects')).sort(byOrder);
 const skills = published(await getCollection('skills'))[0];
 const certifications = published(await getCollection('certifications')).sort(byOrder);
@@ -42,12 +43,14 @@ const interests = published(await getCollection('interests')).sort(byOrder);
 
 <Layout>
   <main class="mx-auto max-w-3xl px-6 pb-32">
-    <header id="top" class="grid items-center gap-8 py-20 sm:grid-cols-[1fr_auto]">
+    <header id="top" class="grid items-center gap-4 py-8 sm:grid-cols-[1fr_auto] sm:gap-8 sm:py-16">
       <div>
-        <h1 class="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+        <h1 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
           {name}
         </h1>
-        <p class="mt-3 max-w-xl text-lg text-slate-600 dark:text-slate-400">{tagline}</p>
+        <p class="mt-3 max-w-xl text-base text-slate-600 sm:text-lg dark:text-slate-400">
+          {tagline}
+        </p>
         <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
           {email && (
             <a
@@ -70,10 +73,15 @@ const interests = published(await getCollection('interests')).sort(byOrder);
 
       {
         avatarUrl && (
-          <div class="order-first sm:order-last sm:w-64">
+          <div class="order-first sm:order-last sm:w-48">
             {/* client:only — the renderer touches window/WebGL, so there is no
                 meaningful server pass to hydrate from. */}
-            <Avatar client:only="react" src={avatarUrl} label={`3D avatar of ${name}`} />
+            <Avatar
+              client:only="react"
+              src={avatarUrl}
+              label={`3D avatar of ${name}`}
+              className="h-24 w-24 sm:h-48 sm:w-48"
+            />
           </div>
         )
       }
@@ -131,6 +139,35 @@ const interests = published(await getCollection('interests')).sort(byOrder);
         }
       </div>
     </Section>
+
+    {
+      stories.length > 0 && (
+        <Section
+          id="stories"
+          title="Case studies"
+          lead="Longer write-ups of the work above — the constraints, what was rejected, and what it cost."
+        >
+          <ul class="space-y-1">
+            {stories.map((s) => (
+              <li>
+                <a
+                  href={`/stories/${s.id}/`}
+                  class="-mx-3 block rounded-lg px-3 py-3 transition hover:bg-slate-50 dark:hover:bg-slate-900"
+                >
+                  <h3 class="text-sm font-medium text-slate-900 dark:text-white">{s.data.title}</h3>
+                  <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    {s.data.blurb}
+                  </p>
+                  <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                    {s.data.domain.join(' · ')}
+                  </p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )
+    }
 
     <Section id="projects" title="Projects">
       <div class="grid gap-4 sm:grid-cols-2">
@@ -236,4 +273,5 @@ const interests = published(await getCollection('interests')).sort(byOrder);
       )
     }
   </main>
+
 </Layout>

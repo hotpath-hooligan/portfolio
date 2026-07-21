@@ -10,7 +10,7 @@ const md = (dir: string) => glob({ pattern: '*.md', base: `./src/content/${dir}`
 
 /**
  * Shared across every collection. Draft entries are skipped by both the page
- * renderers and `scripts/build-index.mjs`, so half-written content can live in
+ * renderers and the backend index builder, so half-written content can live in
  * the repo without the chat citing it as fact.
  */
 const base = {
@@ -118,6 +118,35 @@ const projects = defineCollection({
     }),
 });
 
+/**
+ * Long-form engineering case studies — the "how did you actually decide that"
+ * layer under an experience highlight.
+ *
+ * Deliberately anonymised: no employer product names, internal service
+ * codenames, repository paths, or version identifiers. These describe systems
+ * problems, not a specific company's systems. Anything that would only make
+ * sense to someone inside the org has been rewritten or dropped.
+ */
+const stories = defineCollection({
+  loader: md('stories'),
+  schema: z.object({
+    ...base,
+    title: z.string(),
+    blurb: z.string(),
+    /** What was personally owned, in one clause. Keeps the claims honest. */
+    role: z.string(),
+    /** Technologies and domains, shown as chips and folded into the index. */
+    domain: z.array(z.string()).default([]),
+    /**
+     * Name of the `experience` highlight this expands on, if any. Used to link
+     * the two together — matched against `highlights[].name`, so it must be
+     * spelled identically.
+     */
+    highlight: z.string().optional(),
+    order: z.number().default(0),
+  }),
+});
+
 const skills = defineCollection({
   loader: md('skills'),
   schema: z.object({
@@ -165,6 +194,7 @@ export const collections = {
   about: prose,
   interests,
   experience,
+  stories,
   projects,
   skills,
   certifications,

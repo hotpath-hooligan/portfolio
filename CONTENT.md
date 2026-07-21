@@ -1,23 +1,21 @@
 # Filling in your content
 
 Everything on the site comes from Markdown in `src/content/`. Edit a file, run
-`npm run dev`, and the page updates. Run `npm run build` before deploying — that
-regenerates the chat's search index from whatever you wrote.
+`npm run dev`, and the page updates.
 
 **The `draft` flag.** Every entry supports `draft: true`. A draft is excluded
 from the site *and* from the chat index, so half-written notes can sit in the
 repo without the assistant quoting them as fact. Delete the line to publish.
 
-**After editing, always:**
+**After editing, always redeploy the backend:**
 
 ```bash
-npm run build   # rebuilds the search index from your content
-npm test        # 19 retrieval cases — catches content edits that break search
+make deploy   # rebuilds the chat's search index from your content
 ```
 
-If you rename or delete a section, `npm test` may fail because the retrieval
-tests pin specific chunk ids. That's the test doing its job: update
-`src/lib/search/retrieval.test.ts` to match your new content.
+The chat's index is built from this content and baked into the backend image,
+so the assistant keeps answering from the old content until you redeploy. The
+site itself updates on its own build.
 
 ---
 
@@ -52,6 +50,42 @@ list — it measurably improves the answers.
 Write `detail` with concrete numbers ("10,000+ concurrent sessions",
 "sub-5-second"). Retrieval and the model both do better with specifics, and so
 do human readers.
+
+## Case studies — `src/content/stories/*.md`
+
+Long-form write-ups of the work in `experience`. One file per system, rendered at
+`/stories/<filename>/`.
+
+```yaml
+---
+title: Replacing a Shared Read Dependency With Event-Driven Materialized Views
+blurb: >-
+  One or two sentences. Shown in the list and used as the page description.
+role: What you personally owned, in one clause.
+domain: [Kafka, Redis, Lua] # chips, and indexed
+highlight: Core Facts # optional: links to that experience highlight
+order: 90 # higher = listed first
+---
+## The problem
+## The design
+## Tradeoffs
+```
+
+**Every `##` heading becomes its own chunk.** That is the whole point: "what
+were the tradeoffs on X" retrieves the tradeoffs section, not the entire case
+study. Write headings as the questions people actually ask — *The problem*,
+*What shipped*, *Tradeoffs*, *What I'd fix first* — and keep sections to a few
+paragraphs each.
+
+`highlight` must match a `highlights[].name` in an `experience` entry exactly;
+it renders as a link back to that anchor on the home page.
+
+**Before adding one, read it as a stranger would.** These are the most detailed
+pages on the site and the easiest place to leak an employer's internals. No
+internal service or product codenames, no repository paths, no version
+identifiers, no unreleased roadmap. Describe the systems problem, not the
+company's system. Numbers need to be ones you could defend publicly — order-of-
+magnitude scale is fine, an internal SLO is not.
 
 ## Projects — `src/content/projects/*.md`
 

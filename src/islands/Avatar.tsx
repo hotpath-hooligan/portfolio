@@ -5,6 +5,8 @@ interface Props {
   src: string;
   /** Accessible description; the canvas is otherwise opaque to screen readers. */
   label: string;
+  /** Sizing for the canvas host. The renderer follows it via ResizeObserver. */
+  className?: string;
 }
 
 /**
@@ -18,7 +20,7 @@ interface Props {
  * Rendering is on-demand rather than a permanent rAF loop: an idle animation on
  * a portfolio hero should not keep a phone's GPU busy while someone reads.
  */
-export default function Avatar({ src, label }: Props) {
+export default function Avatar({ src, label, className = 'h-56 w-full sm:h-72' }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -198,7 +200,7 @@ export default function Avatar({ src, label }: Props) {
       ref={hostRef}
       role="img"
       aria-label={label}
-      className="pointer-events-none h-56 w-full sm:h-72"
+      className={`pointer-events-none ${className}`}
     />
   );
 }

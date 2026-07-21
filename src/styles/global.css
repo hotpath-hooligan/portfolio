@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+/*
+ * The chat rail is fixed-position, so the page has to reserve the space itself
+ * or the content ends up underneath it. Only from lg up: below that the chat is
+ * a bottom sheet that deliberately overlays the page.
+ *
+ * The rule is written as "unless collapsed" rather than "when open" so the
+ * server-rendered page — which has no data-chat-rail attribute yet — already
+ * has the gutter and nothing reflows on hydration.
+ */
+@media (min-width: 1024px) {
+  :root:not([data-chat-rail='collapsed']) body {
+    padding-right: 26rem;
+  }
+}

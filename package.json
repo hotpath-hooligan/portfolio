@@ -7,16 +7,12 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "tsx scripts/build-index.ts && astro build",
+    "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "build:index": "tsx scripts/build-index.ts",
-    "test": "tsx --test src/lib/**/*.test.ts scripts/**/*.test.ts",
-    "e2e": "tsx scripts/e2e.ts"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.1",
-    "@huggingface/transformers": "^4.2.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -27,9 +23,6 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
-    "@types/three": "^0.185.1",
-    "gray-matter": "^4.0.3",
-    "puppeteer-core": "^25.3.0",
-    "tsx": "^4.23.1"
+    "@types/three": "^0.185.1"
   }
 }

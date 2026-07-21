@@ -25,15 +25,27 @@ const {
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      // Blocking on purpose, and tiny: the rail's gutter is CSS keyed off this
+      // attribute, so applying a remembered "collapsed" after paint would show
+      // a visible reflow of the whole page.
+      try {
+        if (localStorage.getItem('chat-rail-collapsed') === '1') {
+          document.documentElement.dataset.chatRail = 'collapsed';
+        }
+      } catch {
+        /* private mode / storage disabled — the default (open) is fine. */
+      }
+    </script>
   </head>
   <body
     class="bg-white text-slate-800 antialiased selection:bg-slate-900 selection:text-white dark:bg-slate-950 dark:text-slate-300"
   >
     <slot />
-    {/* The only hydrated component on the page. `client:idle` keeps it out of
-        the critical path — the portfolio content renders and is interactive as
-        static HTML before the chat bundle is even requested. */}
-    <Chat client:idle />
+    {/* The chat rail, on every page. `client:load` rather than `client:idle`:
+        it is the primary interaction here, not a progressive enhancement, and
+        it is on screen from the first paint. */}
+    <Chat client:load />
 
     <script is:inline>
       // Registered after load so it never competes with the first paint.

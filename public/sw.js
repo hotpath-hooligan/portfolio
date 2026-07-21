@@ -1,17 +1,16 @@
 /**
- * Service worker for offline support.
+ * Service worker for offline support of the site shell.
  *
- * Deliberately does NOT touch the model weights: Transformers.js already
- * persists those to the Cache API under its own key, and duplicating ~140 MB
- * into a second cache would double the storage cost and risk eviction of both.
- * This worker's job is only the site shell and the search index.
+ * The chat is not offline-capable and is not meant to be — it is a network
+ * call to the model backend. Everything else on the site is static and reads
+ * fine without a connection.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = `shell-${VERSION}`;
 
 // Everything else is cached on first use. Only the entry point is precached,
 // since hashed asset names are not known until build time.
-const PRECACHE = ['/', '/search/manifest.json'];
+const PRECACHE = ['/'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return; // HF CDN handles its own caching
+  if (url.origin !== self.location.origin) return; // never intercept the chat API
 
   event.respondWith(
     (async () => {
