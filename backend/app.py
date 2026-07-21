@@ -62,7 +62,11 @@ vllm_image = (
         "transformers==5.9.0",
         "huggingface_hub==1.5.0",
     )
-    .env({"HF_HOME": HF_CACHE, "VLLM_USE_V1": "1"})
+    # vLLM 0.25 enables FlashInfer sampling by default. Its wheel does not
+    # include every sampling kernel, so FlashInfer otherwise tries to JIT one
+    # with nvcc at startup. The slim Modal image intentionally has no CUDA
+    # compiler; use vLLM's native sampler instead.
+    .env({"HF_HOME": HF_CACHE, "VLLM_USE_FLASHINFER_SAMPLER": "0"})
     .add_local_python_source(*SOURCE, copy=True)
     # Baked rather than downloaded on first request: all three together are
     # under 3 GB in fp16, and a cold start that also pulls weights is the
