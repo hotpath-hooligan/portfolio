@@ -49,12 +49,12 @@ rebuilds the search index that is baked into its image.
 
 4. **Repository variables**, same page:
 
-   | Variable | Example | Notes |
+   | Variable | Value | Notes |
    | --- | --- | --- |
-   | `SITE` | `https://aryan.github.io` | absolute site URL |
-   | `BASE` | `/portfolio/` | `/` for a user site |
+   | `SITE` | `https://hotpath-hooligan.github.io` | absolute site URL |
+   | `BASE` | `/portfolio/` | repo name; `/` only for a user site |
    | `PUBLIC_CHAT_API` | `https://<workspace>--portfolio-chat-web.modal.run` | printed by the first deploy |
-   | `CHAT_ALLOWED_ORIGINS` | `["https://aryan.github.io"]` | JSON array; CORS allowlist |
+   | `CHAT_ALLOWED_ORIGINS` | `["https://hotpath-hooligan.github.io"]` | JSON array; CORS allowlist |
 
 **Deploy the backend first** — it prints the endpoint URL that
 `PUBLIC_CHAT_API` needs, and that URL is baked into the site bundle at build
