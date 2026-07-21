@@ -3,8 +3,8 @@ import { glob } from 'astro/loaders';
 
 /**
  * Base is the collection's own directory, not `src/content`, so entry ids are
- * bare slugs (`go-netstack`) rather than paths (`projects/go-netstack`) —
- * otherwise `/projects/[slug]` builds as `/projects/projects/go-netstack`.
+ * bare slugs (`packet-tracer`) rather than paths (`projects/packet-tracer`) —
+ * otherwise `/projects/[slug]` builds as `/projects/projects/packet-tracer`.
  */
 const md = (dir: string) => glob({ pattern: '*.md', base: `./src/content/${dir}` });
 

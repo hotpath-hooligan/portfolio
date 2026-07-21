@@ -7,7 +7,7 @@ location: Bangalore, India
 email: aryan_kapoor@zohomail.in
 links:
   - label: GitHub
-    url: https://github.com/akap-hub
+    url: https://github.com/hotpath-hooligan
   - label: LinkedIn
     url: https://www.linkedin.com/in/akap
 # Path under src/assets/, relative to this file. Remove the line to drop the

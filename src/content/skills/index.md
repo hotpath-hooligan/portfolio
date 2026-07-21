@@ -2,14 +2,12 @@
 title: Skills
 groups:
   - name: Languages
-    items: [Python, Java, Go, JavaScript, TypeScript, C]
-  - name: Frameworks
-    items: [Django, Spring Boot, React, React Native, Express.js, gRPC, Ethereum DApps]
-  - name: Infrastructure
-    items: [AWS, Kubernetes, Docker, Jenkins, Terraform, CI/CD, Microservices]
-  - name: AI/ML
-    items: [LangGraph, AWS Bedrock, RAG, Rasa NLU, OpenSearch]
-  - name: Databases & Messaging
+    items: [Go, Java, Python, JavaScript, TypeScript, SQL, C]
+  - name: Backend & APIs
+    items: [Django, Spring Boot, FastAPI, REST, WebSocket, SSE, JWT, gRPC]
+  - name: Streaming & Data
+    items: [Kafka, Kafka Streams, CDC, Avro, Schema Registry, RabbitMQ, Spark, S3]
+  - name: Databases & Search
     items:
       [
         PostgreSQL,
@@ -20,14 +18,21 @@ groups:
         MongoDB,
         Redshift,
         OpenSearch,
-        Kafka,
-        RabbitMQ,
+        RocksDB,
       ]
-  - name: Observability
-    items: [EFK, Datadog, Prometheus, Grafana, Envoy, HAProxy, OPA]
+  - name: Cloud & Platform
+    items: [AWS, Kubernetes, Terraform, Terragrunt, Helm, Docker, Cilium, GitHub Actions]
+  - name: Networking & Security
+    items: [Linux, TCP/IP, TLS, GRE, IPsec, NAT Traversal, DPDK, OPA, Rego]
+  - name: AI & Retrieval
+    items: [AWS Bedrock, LangGraph, RAG, OpenSearch, vLLM, Hugging Face, BM25, RRF, Reranking]
+  - name: Frontend & Real-Time
+    items: [React, React Native, WebAssembly, WebRTC, Socket.IO, Leaflet]
+  - name: Observability & Quality
+    items: [Datadog, OpenTelemetry, Prometheus, Grafana, EFK, Unit Testing, Integration Testing]
 ---
 
 Strongest in distributed backend systems — event-driven architectures, service
 authorization, and the networking layer underneath both. Recent work has pulled
 toward LLM application infrastructure: retrieval, agentic tool orchestration,
-and streaming interfaces.
+streaming interfaces, evaluation, and grounded answer generation.

@@ -1,20 +1,27 @@
 ---
-title: NES Emulator
+title: GoNES
 blurb: >-
-  Cycle-accurate Nintendo Entertainment System emulator written from scratch in C.
-stack: [C, Systems Programming, Emulation]
-repo: https://github.com/akap-hub/nes-emu
+  A complete NES emulator in Go, delivered to the browser through WebAssembly.
+stack: [Go, WebAssembly, Emulation, Ebitengine]
+repo: https://github.com/hotpath-hooligan/nes-emu
+demo: https://hotpath-hooligan.github.io/nes-emu/
 featured: true
 order: 3
 ---
 
-A low-level Nintendo Entertainment System emulator developed in C, implementing
-the 6502 CPU instruction set, PPU graphics processing, and APU sound synthesis
-with cycle-accurate timing and memory mapping.
+A Nintendo Entertainment System emulator written in Go with a platform-neutral
+core covering the MOS 6502 CPU, PPU graphics, five-channel APU audio, cartridge
+memory, and controllers. It supports six mapper families—NROM, MMC1, UxROM,
+CNROM, AxROM, and Color Dreams—and runs in the browser at 60 Hz through
+WebAssembly and Ebitengine.
 
-The interesting constraint in NES emulation is that games depend on hardware
-timing quirks rather than documented behaviour — the PPU and CPU run on a fixed
-clock ratio, and any title using mid-scanline raster effects will render
-incorrectly if that relationship drifts. Getting the memory mapper and the
-PPU/CPU interleave right is most of the work; the instruction set itself is the
-easy part.
+The browser build keeps locally selected ROMs on the user's device, supports
+keyboard and touch controls, streams 44.1 kHz audio, and offers an optional CRT
+display treatment. Its release build generates a launcher for bundled ROMs,
+ships only an explicit asset allowlist, strips debug data and local paths, and
+enforces a compressed WebAssembly size budget.
+
+The hard part is coordination rather than instruction decoding: CPU, PPU, and
+APU timing must remain aligned while mapper hardware changes which program and
+graphics banks are visible. Small timing errors surface as broken raster
+effects, unstable audio, or game-specific compatibility failures.

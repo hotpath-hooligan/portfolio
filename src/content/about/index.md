@@ -1,26 +1,21 @@
 ---
 title: About
-tagline: 'TODO: one line on who you are and what you like building'
-draft: true
+tagline: Backend, platform, networking, and the systems underneath them.
 order: 0
 ---
 
-<!--
-TODO — Aryan, write this section. It is the only page with no resume source, and
-it is what the chat will lean on for "tell me about yourself" style questions,
-which is the single most likely opening question a recruiter asks.
+I am a senior software engineer based in Bangalore with six years of
+experience building backend and platform systems for large-scale SaaS products.
+My work sits where distributed state, networking, security, and infrastructure
+meet: event-driven data platforms, multi-tenant authorization, remote access and
+diagnostics, and evidence-grounded AI systems.
 
-Worth covering:
-  - What kind of problems you want to be handed (the honest answer, not the
-    resume answer).
-  - The through-line connecting the NES emulator, Go-Netstack, and the platform
-    work at Ericsson — there is clearly one, and it is more interesting than any
-    individual bullet.
-  - Where you are based and whether you are open to opportunities.
+I am drawn to problems where the abstraction is not enough and understanding
+the mechanism underneath changes the design. That thread runs from implementing
+Ethernet and IPv4 forwarding in Packet Tracer and emulating an NES in Go, to
+designing Kafka-backed materialized views, policy decision planes, and systems
+that reach devices behind NAT.
 
-Two or three short paragraphs is plenty. Delete `draft: true` from the
-frontmatter above when done — until then this file is excluded from both the
-site and the chat index.
--->
-
-TODO: replace this placeholder.
+I care about explicit trade-offs, observable failure modes, and keeping claims
+grounded in what actually shipped. I am open to conversations about backend,
+platform, distributed-systems, and infrastructure engineering roles.

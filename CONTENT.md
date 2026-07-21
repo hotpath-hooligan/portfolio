@@ -157,9 +157,9 @@ Optional: what the cert actually covers.
 
 ## About — `src/content/about/index.md`
 
-Currently `draft: true`. **This is the highest-value gap.** "Tell me about
-yourself" is the most likely first question anyone asks the chat, and nothing
-on the site answers it today.
+The published About entry gives both the page and the chat a concise answer to
+"tell me about yourself." Keep it focused on the engineering through-line and
+the kinds of problems you want to work on; resume bullets belong in Experience.
 
 ```yaml
 ---
