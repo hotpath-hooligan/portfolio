@@ -42,7 +42,7 @@ MODELS: list[ModelEntry] = [
     ),
 ]
 
-DEFAULT_KEY = "qwen-0.8b"
+DEFAULT_KEY = "lfm2-230m"
 
 BY_KEY = {m.key: m for m in MODELS}
 

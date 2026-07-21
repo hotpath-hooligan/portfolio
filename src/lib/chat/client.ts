@@ -57,6 +57,7 @@ export async function ask(
   const decoder = new TextDecoder();
   let buffer = '';
   let answer = '';
+  let completed = false;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -82,7 +83,15 @@ export async function ask(
         answer += payload.text;
         handlers.onToken?.(payload.text);
       } else if (name === 'error') throw new ChatError(payload.message);
+      else if (name === 'done') completed = true;
     }
+  }
+
+  if (!completed) {
+    throw new ChatError("The assistant's response was interrupted. Please try again.");
+  }
+  if (!answer.trim()) {
+    throw new ChatError('The assistant returned an empty response. Please try again.');
   }
 
   return answer;

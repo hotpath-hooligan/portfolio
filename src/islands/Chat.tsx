@@ -10,10 +10,10 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-  'What does he use for authorization?',
-  'Tell me about Remote Connect',
-  'What databases has he worked with?',
-  'Is he certified in anything?',
+  'How did Aryan scale remote diagnostics to millions of runs?',
+  'How did Aryan build browser-based remote access behind NAT?',
+  'How did Aryan replace shared database reads with Kafka and Redis?',
+  'How has Aryan used LLMs for network troubleshooting?',
 ];
 
 const COLLAPSE_KEY = 'chat-rail-collapsed';
@@ -57,6 +57,19 @@ export default function Chat() {
   const pickModel = useCallback((key: string) => {
     setModel(key);
     localStorage.setItem(MODEL_KEY, key);
+    setPicking(false);
+  }, []);
+
+  /**
+   * Start over. The model is fixed for the life of a conversation — the history
+   * a small model was given is the history it keeps answering from — so a new
+   * chat is also the only moment the picker reopens.
+   */
+  const newChat = useCallback(() => {
+    abortRef.current?.abort();
+    historyRef.current = [];
+    setMessages([]);
+    setInput('');
     setPicking(false);
   }, []);
 
@@ -130,10 +143,12 @@ export default function Chat() {
   );
 
   const active = modelByKey(model);
+  const started = messages.length > 0;
 
   return (
     <>
       <button
+        type="button"
         onClick={() => setCollapsedPersisted(false)}
         aria-expanded={open}
         aria-controls="chat-rail"
@@ -172,14 +187,29 @@ export default function Chat() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              {started ? (
+                <button
+                  type="button"
+                  onClick={newChat}
+                  aria-label="New chat"
+                  title="New chat"
+                  data-new-chat
+                  className="rounded-md px-2 py-1 text-lg leading-none text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                >
+                  <span aria-hidden>+</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setPicking((p) => !p)}
+                  aria-expanded={picking}
+                  className="rounded-md px-2 py-1 text-[11px] text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                >
+                  Model
+                </button>
+              )}
               <button
-                onClick={() => setPicking((p) => !p)}
-                aria-expanded={picking}
-                className="rounded-md px-2 py-1 text-[11px] text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
-              >
-                Model
-              </button>
-              <button
+                type="button"
                 onClick={() => setCollapsedPersisted(true)}
                 aria-label="Collapse chat"
                 className="rounded-md px-2 py-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
@@ -194,7 +224,7 @@ export default function Chat() {
             </div>
           </header>
 
-          {picking && <ModelPicker active={model} onPick={pickModel} />}
+          {picking && !started && <ModelPicker active={model} onPick={pickModel} />}
 
           <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4 lg:px-5">
             {messages.length === 0 && (
@@ -206,9 +236,10 @@ export default function Chat() {
                 <div className="grid gap-2">
                   {SUGGESTIONS.map((s) => (
                     <button
+                      type="button"
                       key={s}
-                      onClick={() => send(s)}
-                      className="rounded-xl border border-slate-200 px-3.5 py-2.5 text-left text-sm text-slate-600 transition hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
+                      onClick={() => void send(s)}
+                      className="cursor-pointer rounded-xl border border-slate-200 px-3.5 py-2.5 text-left text-sm text-slate-600 transition hover:border-slate-400 hover:text-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                     >
                       {s}
                     </button>
@@ -267,8 +298,12 @@ function ModelPicker({ active, onPick }: { active: string; onPick: (key: string)
       data-role="picker"
       className="space-y-1.5 border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950"
     >
+      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+        Pick a model. It stays fixed for this chat — start a new one to switch.
+      </p>
       {MODELS.map((m) => (
         <button
+          type="button"
           key={m.key}
           data-model={m.key}
           onClick={() => onPick(m.key)}
@@ -278,7 +313,14 @@ function ModelPicker({ active, onPick }: { active: string; onPick: (key: string)
               : 'border-slate-200 hover:border-slate-400 dark:border-slate-800 dark:hover:border-slate-600'
           }`}
         >
-          <span className="text-xs font-medium text-slate-900 dark:text-white">{m.label}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-xs font-medium text-slate-900 dark:text-white">{m.label}</span>
+            {m.recommended && (
+              <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                Recommended
+              </span>
+            )}
+          </span>
           <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{m.blurb}</p>
         </button>
       ))}

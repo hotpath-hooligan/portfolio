@@ -16,6 +16,7 @@ resolves the declared type at class-definition time. With it, `model_key: str`
 arrives as the *string* `'str'` and the deploy dies on a missing encoder.
 """
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -158,7 +159,14 @@ def web():
     from sentence_transformers import SentenceTransformer
 
     import build_index
-    from prompt import build_messages, site_topics
+    from prompt import (
+        CONVERSATIONAL,
+        GROUNDED,
+        UNSUPPORTED,
+        build_messages,
+        is_conversational,
+        site_topics,
+    )
     from retrieval import (
         Result,
         fuse,
@@ -219,27 +227,67 @@ def web():
     @api.post("/chat")
     async def chat(ask: Ask) -> StreamingResponse:
         entry = model_by_key(ask.model)
-        results, grounded = retrieve(ask.query)
+        if is_conversational(ask.query):
+            results, mode = [], CONVERSATIONAL
+        else:
+            results, grounded = retrieve(ask.query)
+            mode = GROUNDED if grounded else UNSUPPORTED
+
         messages = build_messages(
             query=ask.query,
-            results=results if grounded else [],
+            results=results if mode == GROUNDED else [],
             history=[t.model_dump() for t in ask.history],
             topics=topics,
             model_label=entry.label,
             model_params=entry.params,
+            mode=mode,
         )
 
         async def stream():
             sources = [
                 {"id": r.chunk.id, "title": r.chunk.title, "url": r.chunk.url}
-                for r in (results[:3] if grounded else [])
+                for r in (results[:3] if mode == GROUNDED else [])
             ]
             yield _event("sources", {"sources": sources})
+
+            # Starting a scaled-to-zero GPU can take longer than an HTTP proxy's
+            # idle timeout. Produce tokens in the background so this stream can
+            # send SSE comments while it waits for the first one. Comments are
+            # ignored by the browser's SSE parser but keep the connection alive.
+            output = asyncio.Queue()
+
+            async def generate():
+                try:
+                    async for delta in Model(model_key=entry.key).generate.remote_gen.aio(messages):
+                        await output.put(("token", delta))
+                except Exception as err:
+                    await output.put(("error", str(err)))
+                finally:
+                    await output.put(("done", None))
+
+            producer = asyncio.create_task(generate())
             try:
-                async for delta in Model(model_key=entry.key).generate.remote_gen.aio(messages):
-                    yield _event("token", {"text": delta})
-            except Exception as err:  # surfaced in the UI rather than a dead stream
-                yield _event("error", {"message": str(err)})
+                while True:
+                    try:
+                        event, payload = await asyncio.wait_for(output.get(), timeout=10)
+                    except TimeoutError:
+                        yield ": keep-alive\n\n"
+                        continue
+
+                    if event == "token":
+                        yield _event("token", {"text": payload})
+                    elif event == "error":
+                        yield _event("error", {"message": payload})
+                        break
+                    else:
+                        break
+            finally:
+                if not producer.done():
+                    producer.cancel()
+                try:
+                    await producer
+                except asyncio.CancelledError:
+                    pass
             yield _event("done", {})
 
         return StreamingResponse(stream(), media_type="text/event-stream")

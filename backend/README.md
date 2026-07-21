@@ -81,8 +81,15 @@ so blending the raw numbers needs constants that drift as content is added.
 
 Grounding is decided by lexical overlap, with the cosine arm as a fallback for
 a real question phrased outside the corpus vocabulary. Ungrounded questions
-still get an answer — the model is told plainly there is no context, rather
-than the server refusing on its behalf.
+still go through the selected model, but with an unsupported-question prompt
+that asks it to state the site's limits and offer covered topics.
+
+Before retrieval, pure conversational turns such as greetings, thanks, and
+model-identity questions are routed to a conversational prompt. Grounded,
+unsupported, and conversational turns all remain model-generated; the server
+does not return canned replies. Keeping the three prompt modes separate avoids
+giving a small model contradictory instructions about both greeting the visitor
+and refusing for lack of portfolio evidence.
 
 `tokens.py` is shared by the builder and query time. Never fork it: if the
 build stems "Kubernetes" to `kubernet` and a query stems it to `kubernetes`,

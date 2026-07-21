@@ -5,6 +5,8 @@ export interface ModelEntry {
   label: string;
   params: string;
   blurb: string;
+  /** Shown as "Recommended" in the picker. The cheapest one to serve. */
+  recommended?: boolean;
 }
 
 export const MODELS: ModelEntry[] = [
@@ -13,6 +15,7 @@ export const MODELS: ModelEntry[] = [
     label: 'LFM2.5 230M',
     params: '230 million',
     blurb: 'Smallest and quickest. Terse, sticks close to what it is given.',
+    recommended: true,
   },
   {
     key: 'lfm2-350m',
@@ -28,7 +31,7 @@ export const MODELS: ModelEntry[] = [
   },
 ];
 
-export const DEFAULT_MODEL = 'qwen-0.8b';
+export const DEFAULT_MODEL = 'lfm2-230m';
 
 export function modelByKey(key: string): ModelEntry | undefined {
   return MODELS.find((m) => m.key === key);
