@@ -8,8 +8,11 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   // Static output, served as plain files. SITE gives absolute URLs in the
   // build; BASE is the subpath when deploying to a GitHub Pages project site.
-  site: process.env.SITE ?? 'https://example.com',
-  base: process.env.BASE ?? '/',
+  //
+  // `||` rather than `??`: an unset GitHub Actions variable expands to an empty
+  // string, not undefined, and Astro rejects `site: ""` as an invalid URL.
+  site: process.env.SITE || undefined,
+  base: process.env.BASE || '/',
 
   integrations: [react()],
 
