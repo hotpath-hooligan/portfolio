@@ -9,9 +9,12 @@ Two container types, both scaling to zero.
 
 The browser talks only to `web`, and only ever sends a question — no index, no
 weights and no embedder reach the client.
-"""
 
-from __future__ import annotations
+Deliberately no `from __future__ import annotations` here, unlike the rest of
+the package: it turns every annotation into a string, and `modal.parameter()`
+resolves the declared type at class-definition time. With it, `model_key: str`
+arrives as the *string* `'str'` and the deploy dies on a missing encoder.
+"""
 
 import json
 import os
