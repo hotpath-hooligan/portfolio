@@ -54,8 +54,15 @@ def _build_index() -> None:
 
 vllm_image = (
     modal.Image.debian_slim(python_version="3.12")
-    .pip_install("vllm==0.11.0", "huggingface_hub[hf_transfer]==0.35.3")
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HOME": HF_CACHE, "VLLM_USE_V1": "1"})
+    # Qwen3.5's tokenizer and model architecture require the Transformers 5
+    # generation of the vLLM stack. Keep these pins together: vLLM 0.11 pulled
+    # Transformers 4, which cannot resolve Qwen's `TokenizersBackend` class.
+    .pip_install(
+        "vllm==0.25.1",
+        "transformers==5.9.0",
+        "huggingface_hub==1.5.0",
+    )
+    .env({"HF_HOME": HF_CACHE, "VLLM_USE_V1": "1"})
     .add_local_python_source(*SOURCE, copy=True)
     # Baked rather than downloaded on first request: all three together are
     # under 3 GB in fp16, and a cold start that also pulls weights is the
