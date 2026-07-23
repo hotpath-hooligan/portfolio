@@ -6,6 +6,7 @@ blurb: >-
   problem.
 role: Traced and redesigned the tunnel interface and addressing model; worked on the userspace forwarding path.
 domain: [DPDK, C, Go, GRE, IPsec, Networking]
+highlight: SD-WAN Overlay Dataplane
 order: 70
 ---
 

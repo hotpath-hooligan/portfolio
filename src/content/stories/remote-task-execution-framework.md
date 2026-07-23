@@ -6,6 +6,7 @@ blurb: >-
   socket.
 role: Owned the response-correlation and worker-decoupling path.
 domain: [RabbitMQ, Redis, Python, TLS, Distributed Systems]
+highlight: Remote Task Execution Framework
 order: 60
 ---
 

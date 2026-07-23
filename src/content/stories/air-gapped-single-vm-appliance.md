@@ -6,6 +6,7 @@ blurb: >-
   codebase.
 role: Worked on the device stream server, the cloud abstraction layer, and the on-premise network design.
 domain: [Go, Kubernetes, Kafka, Cilium, TLS, Redis]
+highlight: Single-VM Private Deployment
 order: 65
 ---
 

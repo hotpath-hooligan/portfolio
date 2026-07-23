@@ -1,56 +1,27 @@
 # Portfolio
 
-A static Astro site with a retrieval-augmented chat that answers questions about
-its own content.
+A static Astro portfolio with Markdown content.
 
-Two deployable pieces, and only one of them is a server:
-
-| Piece | What it is | Where it runs |
-| --- | --- | --- |
-| Site | Astro static build (`dist/`) | GitHub Pages, or any static host |
-| Chat backend | FastAPI + vLLM | Modal, scale-to-zero |
-
-Content lives in `src/content/` as Markdown — see [CONTENT.md](CONTENT.md).
-
-## Running it
+## Development
 
 ```sh
 npm install
-make dev                  # http://localhost:4321
+npm run dev
 ```
 
-The chat talks to the deployed backend by default. To work against a local
-one, run `make serve-backend` and put the temporary URL it prints in
-`PUBLIC_CHAT_API` — the only environment variable this project reads.
+The development server runs at `http://localhost:4321`.
 
-## Deploying
+## Content
 
-Two workflows, each triggered by the paths it owns:
+Portfolio content lives in `src/content/`. See [CONTENT.md](CONTENT.md) for the
+available collections and frontmatter fields.
 
-| Workflow | Fires on | Does |
-| --- | --- | --- |
-| `deploy-backend.yml` | `backend/**`, `src/content/**` | `modal deploy` |
-| `deploy-pages.yml` | everything else | Astro build → GitHub Pages |
+## Build and deploy
 
-Content changes fire **both**: the site rebuilds its pages, and the backend
-rebuilds the search index that is baked into its image.
+```sh
+npm run build
+npm run preview
+```
 
-### One-time setup
-
-1. **GitHub Pages.** Settings → Pages → Source: **GitHub Actions**.
-2. **Two repository secrets**, from [modal.com/settings/tokens](https://modal.com/settings/tokens):
-
-   | Secret | |
-   | --- | --- |
-   | `MODAL_TOKEN_ID` | Modal API token |
-   | `MODAL_TOKEN_SECRET` | Modal API token |
-
-That is the whole configuration. There are no repository variables: the site
-URL, the base path, the API endpoint and the CORS allowlist are all public
-values that never change, so they live in `astro.config.mjs`,
-`src/lib/chat/client.ts` and `backend/app.py` rather than in CI settings.
-
-No Hugging Face token is needed; all three model repos are public.
-
-Backend details — models, retrieval, the API contract — are in
-[backend/README.md](backend/README.md).
+The production build is written to `dist/`. Pushes to `main` are deployed to
+GitHub Pages by `.github/workflows/deploy-pages.yml`.

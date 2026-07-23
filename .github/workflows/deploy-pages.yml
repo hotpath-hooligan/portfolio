@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'backend/**'
   workflow_dispatch:
 
 concurrency:
@@ -33,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Build static site
-        run: make build
+        run: npm run build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6

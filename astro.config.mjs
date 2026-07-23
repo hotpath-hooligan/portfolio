@@ -1,18 +1,16 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  // Astro emits absolute asset URLs, so it has to be told the subpath it will
-  // be served from. `base` is the repo name because this is a GitHub *project*
-  // site; it would be '/' for hotpath-hooligan.github.io itself.
-  site: 'https://hotpath-hooligan.github.io',
-  base: '/portfolio/',
-
-  integrations: [react()],
+  // Astro emits absolute asset URLs, so it has to be told where it will be
+  // served from. The custom domain in public/CNAME serves this repo at the
+  // root, so `base` is '/' rather than the repo name it would be on a bare
+  // github.io project site.
+  site: 'https://aryankapoor.me',
+  base: '/',
 
   vite: {
     plugins: [tailwindcss()],

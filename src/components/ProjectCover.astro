@@ -5,19 +5,28 @@ import type { ImageMetadata } from 'astro';
 interface Props {
   cover?: ImageMetadata;
   title: string;
-  /** Rendered widths; the card and the detail hero want different sizes. */
+  year?: string;
   widths?: number[];
+  decorative?: boolean;
   class?: string;
 }
 
-const { cover, title, widths = [400, 800], class: className = '' } = Astro.props;
+const {
+  cover,
+  title,
+  year,
+  widths = [400, 800],
+  decorative = false,
+  class: className = '',
+} = Astro.props;
 
 /**
- * Deterministic placeholder when a project has no cover yet. Derived from the
- * title so each project keeps a stable colour across builds rather than
- * flickering to a new one whenever content is reordered.
+ * Deterministic, code-native art for projects without screenshots. The title
+ * selects a palette and motif, so every project remains visually distinct.
  */
-const hue = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+const hash = [...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const hue = [12, 42, 158, 197, 224, 266][hash % 6];
+const variant = hash % 4;
 const initials = title
   .split(/\s+/)
   .slice(0, 2)
@@ -30,7 +39,7 @@ const initials = title
   cover ? (
     <Image
       src={cover}
-      alt={`${title} screenshot`}
+      alt={decorative ? '' : `${title} project cover`}
       widths={widths}
       sizes="(max-width: 640px) 100vw, 400px"
       loading="lazy"
@@ -39,11 +48,18 @@ const initials = title
     />
   ) : (
     <div
-      class={`flex h-full w-full items-center justify-center ${className}`}
-      style={`background: linear-gradient(135deg, oklch(0.30 0.07 ${hue}), oklch(0.19 0.05 ${(hue + 40) % 360}))`}
+      class={`project-art ${className}`}
+      data-variant={variant}
+      style={`--cover-hue: ${hue}`}
       aria-hidden="true"
     >
-      <span class="text-2xl font-semibold tracking-tight text-white/60">{initials}</span>
+      <span class="project-art__meta">{year ?? 'Independent build'}</span>
+      <span class="project-art__initials">{initials}</span>
+      <span class="project-art__title">{title}</span>
+      <span class="project-art__orb project-art__orb--one"></span>
+      <span class="project-art__orb project-art__orb--two"></span>
+      <span class="project-art__line project-art__line--one"></span>
+      <span class="project-art__line project-art__line--two"></span>
     </div>
   )
 }

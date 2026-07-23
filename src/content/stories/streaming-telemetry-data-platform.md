@@ -6,6 +6,7 @@ blurb: >-
   partitioned analytics.
 role: Worked on the streaming funnel service, schema-contract enforcement, and the lake ingest path.
 domain: [Kafka, Kafka Streams, Avro, Java, Spark, S3, RocksDB]
+highlight: Common Data Platform
 order: 75
 ---
 

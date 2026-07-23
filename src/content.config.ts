@@ -8,20 +8,12 @@ import { glob } from 'astro/loaders';
  */
 const md = (dir: string) => glob({ pattern: '*.md', base: `./src/content/${dir}` });
 
-/**
- * Shared across every collection. Draft entries are skipped by both the page
- * renderers and the backend index builder, so half-written content can live in
- * the repo without the chat citing it as fact.
- */
+/** Shared across every collection so unfinished entries can stay unpublished. */
 const base = {
   draft: z.boolean().default(false),
 };
 
-/**
- * Identity and contact details. A collection rather than constants in the page
- * so the chat can answer "how do I contact him?" — details living only in page
- * markup never reach the search index.
- */
+/** Identity and contact details shown in the page header. */
 const profile = defineCollection({
   loader: md('profile'),
   schema: z.object({
@@ -34,11 +26,6 @@ const profile = defineCollection({
     links: z
       .array(z.object({ label: z.string(), url: z.string().url() }))
       .default([]),
-    /**
-     * Path to a .glb under `src/assets/`, relative to this file. Omit and the
-     * hero simply renders without an avatar — nothing else changes.
-     */
-    avatar: z.string().optional(),
   }),
 });
 
@@ -78,10 +65,7 @@ const experience = defineCollection({
     /** Higher = more recent. Drives reverse-chronological ordering. */
     order: z.number(),
     summary: z.string(),
-    /**
-     * Named workstreams. Each becomes its own retrieval chunk so the chat can
-     * cite "Remote Connect" without dragging in the whole Ericsson tenure.
-     */
+    /** Named workstreams shown beneath the role summary. */
     highlights: z
       .array(
         z.object({
@@ -116,35 +100,6 @@ const projects = defineCollection({
       featured: z.boolean().default(false),
       order: z.number().default(0),
     }),
-});
-
-/**
- * Long-form engineering case studies — the "how did you actually decide that"
- * layer under an experience highlight.
- *
- * Deliberately anonymised: no employer product names, internal service
- * codenames, repository paths, or version identifiers. These describe systems
- * problems, not a specific company's systems. Anything that would only make
- * sense to someone inside the org has been rewritten or dropped.
- */
-const stories = defineCollection({
-  loader: md('stories'),
-  schema: z.object({
-    ...base,
-    title: z.string(),
-    blurb: z.string(),
-    /** What was personally owned, in one clause. Keeps the claims honest. */
-    role: z.string(),
-    /** Technologies and domains, shown as chips and folded into the index. */
-    domain: z.array(z.string()).default([]),
-    /**
-     * Name of the `experience` highlight this expands on, if any. Used to link
-     * the two together — matched against `highlights[].name`, so it must be
-     * spelled identically.
-     */
-    highlight: z.string().optional(),
-    order: z.number().default(0),
-  }),
 });
 
 const skills = defineCollection({
@@ -194,7 +149,6 @@ export const collections = {
   about: prose,
   interests,
   experience,
-  stories,
   projects,
   skills,
   certifications,

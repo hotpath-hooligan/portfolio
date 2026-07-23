@@ -7,7 +7,7 @@ stack: [Go, WebAssembly, Networking, TCP/IP]
 repo: https://github.com/hotpath-hooligan/packet_tracer
 demo: https://hotpath-hooligan.github.io/packet_tracer/
 featured: true
-order: 4
+order: 8
 ---
 
 Packet Tracer implements the mechanisms behind a small routed network: Ethernet

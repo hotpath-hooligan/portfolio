@@ -1,8 +1,4 @@
-/**
- * Anchor slugs. Kept in sync with `slugify` in `backend/corpus.py` — the index
- * writes deep links like `/#remote-connect` and the page must emit exactly that
- * id, or every chat citation becomes a link to nowhere.
- */
+/** Convert headings to stable in-page anchor IDs. */
 export function slugify(input: string): string {
   return input
     .toLowerCase()

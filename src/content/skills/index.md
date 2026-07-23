@@ -25,7 +25,19 @@ groups:
   - name: Networking & Security
     items: [Linux, TCP/IP, TLS, GRE, IPsec, NAT Traversal, DPDK, OPA, Rego]
   - name: AI & Retrieval
-    items: [AWS Bedrock, LangGraph, RAG, OpenSearch, vLLM, Hugging Face, BM25, RRF, Reranking]
+    items:
+      [
+        AWS Bedrock,
+        LangGraph,
+        RAG,
+        OpenSearch,
+        Rasa NLU,
+        vLLM,
+        Hugging Face,
+        BM25,
+        RRF,
+        Reranking,
+      ]
   - name: Frontend & Real-Time
     items: [React, React Native, WebAssembly, WebRTC, Socket.IO, Leaflet]
   - name: Observability & Quality

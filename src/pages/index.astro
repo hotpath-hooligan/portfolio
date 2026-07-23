@@ -2,276 +2,393 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Section from '../components/Section.astro';
-import { slugify } from '../lib/slug.ts';
 import ProjectCover from '../components/ProjectCover.astro';
-import Avatar from '../islands/Avatar.tsx';
-
-// Resolve the .glb referenced in profile frontmatter to a hashed build URL.
-// eager:false would hand back a loader function; we only need the URL string.
-const glbs = import.meta.glob<string>('../assets/**/*.glb', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
+import { slugify } from '../lib/slug.ts';
 
 const published = <T extends { data: { draft: boolean } }>(items: T[]) =>
-  items.filter((i) => !i.data.draft);
+  items.filter((item) => !item.data.draft);
 const byOrder = (a: any, b: any) => (b.data.order ?? 0) - (a.data.order ?? 0);
 
 const profile = published(await getCollection('profile'))[0];
 if (!profile) throw new Error('src/content/profile/index.md is required (and must not be draft)');
-const { name, tagline, email, links, avatar } = profile.data;
-
-// Frontmatter stores the path relative to the profile file; the glob keys are
-// relative to this page. Match on the filename, which is unambiguous here.
-const avatarUrl = avatar
-  ? Object.entries(glbs).find(([k]) => k.endsWith(avatar.replace(/^.*\//, '/')))?.[1]
-  : undefined;
-if (avatar && !avatarUrl) throw new Error(`profile.avatar not found in src/assets: ${avatar}`);
+const { name, tagline, location, links } = profile.data;
 
 const about = published(await getCollection('about'))[0];
 const AboutContent = about ? (await render(about)).Content : null;
 
 const experience = published(await getCollection('experience')).sort(byOrder);
-const stories = published(await getCollection('stories')).sort(byOrder);
 const projects = published(await getCollection('projects')).sort(byOrder);
 const skills = published(await getCollection('skills'))[0];
+const SkillsContent = skills ? (await render(skills)).Content : null;
 const certifications = published(await getCollection('certifications')).sort(byOrder);
 const education = published(await getCollection('education')).sort(byOrder);
 const interests = published(await getCollection('interests')).sort(byOrder);
+const renderedInterests = await Promise.all(
+  interests.map(async (interest) => ({
+    interest,
+    Content: (await render(interest)).Content,
+  })),
+);
+
+const featuredProjects = projects.filter((project) => project.data.featured).slice(0, 2);
+const otherProjects = projects.filter((project) => !featuredProjects.includes(project));
+const base = import.meta.env.BASE_URL;
 ---
 
 <Layout>
-  <main class="mx-auto max-w-3xl px-6 pb-32">
-    <header id="top" class="grid items-center gap-4 py-8 sm:grid-cols-[1fr_auto] sm:gap-8 sm:py-16">
-      <div>
-        <h1 class="text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
-          {name}
-        </h1>
-        <p class="mt-3 max-w-xl text-base text-slate-600 sm:text-lg dark:text-slate-400">
-          {tagline}
-        </p>
-        <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {email && (
-            <a
-              href={`mailto:${email}`}
-              class="text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white"
-            >
-              Email
+  <main id="main-content">
+    <section id="top" class="hero">
+      <div class="hero__inner">
+        <div class="hero__copy">
+          <p class="eyebrow">
+            {name}
+            <span aria-hidden="true">/</span>
+            {location}
+          </p>
+          <h1>Architecting the invisible.<br />Scaling the impossible.</h1>
+          <p class="hero__lede">{tagline}</p>
+
+          <div class="hero__actions">
+            <a class="button" href="#experience">
+              Explore selected work
+              <span aria-hidden="true">↓</span>
             </a>
-          )}
-          {links.map((l) => (
-            <a
-              href={l.url}
-              class="text-slate-500 underline-offset-4 transition hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white"
-            >
-              {l.label}
-            </a>
-          ))}
+          </div>
+
+          <p class="hero__note">
+            <span class="status-dot" aria-hidden="true"></span>
+            Open to backend, platform, and infrastructure roles
+          </p>
+        </div>
+
+        <div class="system-map" aria-hidden="true">
+          <div class="system-map__header">
+            <span>System map / 01</span>
+            <span class="system-map__status"><i></i> All paths observable</span>
+          </div>
+
+          <svg viewBox="0 0 620 480" role="presentation">
+            <defs>
+              <pattern id="map-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <path d="M28 0H0V28" class="map-grid-line"></path>
+              </pattern>
+            </defs>
+            <rect width="620" height="480" fill="url(#map-grid)"></rect>
+
+            <path class="map-route map-route--one" d="M95 119H245V238H375"></path>
+            <path class="map-route map-route--two" d="M525 119H410V238H375"></path>
+            <path class="map-route map-route--three" d="M375 238V360H503"></path>
+            <path class="map-route map-route--four" d="M375 238H228V360H110"></path>
+
+            <g class="map-node" transform="translate(48 86)">
+              <rect width="112" height="66" rx="8"></rect>
+              <circle cx="20" cy="20" r="5"></circle>
+              <text x="18" y="45">EDGE</text>
+            </g>
+            <g class="map-node" transform="translate(460 86)">
+              <rect width="112" height="66" rx="8"></rect>
+              <circle cx="20" cy="20" r="5"></circle>
+              <text x="18" y="45">EVENTS</text>
+            </g>
+            <g class="map-node map-node--primary" transform="translate(306 199)">
+              <rect width="138" height="78" rx="10"></rect>
+              <circle cx="22" cy="22" r="6"></circle>
+              <text x="20" y="51">SYSTEMS</text>
+            </g>
+            <g class="map-node" transform="translate(55 327)">
+              <rect width="112" height="66" rx="8"></rect>
+              <circle cx="20" cy="20" r="5"></circle>
+              <text x="18" y="45">POLICY</text>
+            </g>
+            <g class="map-node" transform="translate(448 327)">
+              <rect width="112" height="66" rx="8"></rect>
+              <circle cx="20" cy="20" r="5"></circle>
+              <text x="18" y="45">STATE</text>
+            </g>
+
+            <circle class="map-packet map-packet--one" r="5">
+              <animateMotion dur="4s" repeatCount="indefinite" path="M95 119H245V238H375"></animateMotion>
+            </circle>
+            <circle class="map-packet map-packet--two" r="5">
+              <animateMotion dur="5s" repeatCount="indefinite" path="M525 119H410V238H375"></animateMotion>
+            </circle>
+          </svg>
+
+          <div class="system-map__footer">
+            <span>Packets</span>
+            <i></i>
+            <span>Decisions</span>
+            <i></i>
+            <span>State</span>
+          </div>
         </div>
       </div>
 
+      <dl class="proof-bar">
+        <div>
+          <dt>6+</dt>
+          <dd>Years building production systems</dd>
+        </div>
+      </dl>
+    </section>
+
+    <div class="page-shell">
+      <Section
+        id="experience"
+        index="01"
+        eyebrow="Experience"
+        title="Platform work with real operating constraints."
+        lead="Distributed state, secure remote access, multi-region delivery, and the networking underneath it."
+      >
+        <div class="experience-list">
+          {
+            experience.map((job, jobIndex) => {
+              const primaryHighlights =
+                jobIndex === 0 ? job.data.highlights.slice(0, 4) : job.data.highlights;
+              const additionalHighlights =
+                jobIndex === 0 ? job.data.highlights.slice(4) : [];
+
+              return (
+                <article class="role-card" id={slugify(job.data.company)}>
+                  <div class="role-card__intro">
+                    <div class="role-card__title">
+                      <p class="role-card__date">
+                        {job.data.start} — {job.data.end}
+                        {job.data.end === 'Present' && <span>Current</span>}
+                      </p>
+                      <h3>{job.data.role}</h3>
+                      <p>{job.data.company}{job.data.location && ` · ${job.data.location}`}</p>
+                    </div>
+                    <p class="role-card__summary">{job.data.summary}</p>
+                  </div>
+
+                  <div class="workstream-grid">
+                    {primaryHighlights.map((highlight, index) => (
+                      <div class="workstream" id={slugify(highlight.name)}>
+                        <span class="workstream__number">{String(index + 1).padStart(2, '0')}</span>
+                        <h4>{highlight.name}</h4>
+                        <p>{highlight.detail}</p>
+                        <div class="workstream__footer">
+                          <span>{highlight.tech.slice(0, 4).join(' · ')}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {additionalHighlights.length > 0 && (
+                    <details class="work-more">
+                      <summary>
+                        <span>Explore more work at {job.data.company}</span>
+                        <span>{additionalHighlights.length} workstreams <i aria-hidden="true">+</i></span>
+                      </summary>
+                      <div class="workstream-grid workstream-grid--more">
+                        {additionalHighlights.map((highlight, index) => (
+                          <div class="workstream" id={slugify(highlight.name)}>
+                            <span class="workstream__number">
+                              {String(index + primaryHighlights.length + 1).padStart(2, '0')}
+                            </span>
+                            <h4>{highlight.name}</h4>
+                            <p>{highlight.detail}</p>
+                            <div class="workstream__footer">
+                              <span>{highlight.tech.slice(0, 4).join(' · ')}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </article>
+              );
+            })
+          }
+        </div>
+      </Section>
+
+      <Section
+        id="projects"
+        index="02"
+        eyebrow="Independent builds"
+        title="Learning the mechanism, not just the interface."
+        lead="Emulators, network simulators, kernels, games, and small products—built to understand where the abstraction ends."
+      >
+        <div class="featured-projects">
+          {
+            featuredProjects.map((project) => (
+              <a class="project-card" href={`${base}projects/${project.id}/`}>
+                <div class="project-card__cover">
+                  <ProjectCover
+                    cover={project.data.cover}
+                    title={project.data.title}
+                    year={project.data.year}
+                    decorative
+                  />
+                </div>
+                <div class="project-card__copy">
+                  <div>
+                    <p>{project.data.stack.slice(0, 3).join(' · ')}</p>
+                    <h3>{project.data.title}</h3>
+                  </div>
+                  <span aria-hidden="true">↗</span>
+                </div>
+                <p class="project-card__blurb">{project.data.blurb}</p>
+              </a>
+            ))
+          }
+        </div>
+
+        {
+          otherProjects.length > 0 && (
+            <div class="project-list">
+              {otherProjects.map((project) => (
+                <a href={`${base}projects/${project.id}/`}>
+                  <div>
+                    <h3>{project.data.title}</h3>
+                    <p>{project.data.blurb}</p>
+                  </div>
+                  <span>{project.data.stack.slice(0, 3).join(' · ')}</span>
+                  <i aria-hidden="true">↗</i>
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </Section>
+
       {
-        avatarUrl && (
-          <div class="order-first sm:order-last sm:w-48">
-            {/* client:only — the renderer touches window/WebGL, so there is no
-                meaningful server pass to hydrate from. */}
-            <Avatar
-              client:only="react"
-              src={avatarUrl}
-              label={`3D avatar of ${name}`}
-              className="h-24 w-24 sm:h-48 sm:w-48"
-            />
-          </div>
+        AboutContent && (
+          <Section
+            id="about"
+            index="03"
+            eyebrow="About"
+            title={about?.data.tagline ?? 'Systems, all the way down.'}
+          >
+            <div class="about-grid">
+              <div class="prose prose--large">
+                <AboutContent />
+              </div>
+
+              <dl class="profile-facts">
+                <div>
+                  <dt>Based in</dt>
+                  <dd>{location}</dd>
+                </div>
+                <div>
+                  <dt>Strongest at</dt>
+                  <dd>Backend · Platform · Networking</dd>
+                </div>
+                <div>
+                  <dt>Working style</dt>
+                  <dd>Explicit trade-offs and observable failure modes</dd>
+                </div>
+                <div>
+                  <dt>Find me</dt>
+                  <dd>
+                    {links.map((link, index) => (
+                      <>
+                        {index > 0 && ' · '}
+                        <a href={link.url} rel="me">{link.label}</a>
+                      </>
+                    ))}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="principles">
+              <div>
+                <span>01</span>
+                <h3>Design for recovery.</h3>
+                <p>Retries, replay, cleanup, and restart behavior belong in the first design.</p>
+              </div>
+              <div>
+                <span>02</span>
+                <h3>Make failure legible.</h3>
+                <p>A system is easier to trust when its decisions and degraded states are visible.</p>
+              </div>
+              <div>
+                <span>03</span>
+                <h3>Name the trade-off.</h3>
+                <p>The best architecture is contextual. State what it buys and what it costs.</p>
+              </div>
+            </div>
+          </Section>
         )
       }
-    </header>
 
-    {
-      AboutContent && (
-        <Section id="about" title="About">
-          <div class="space-y-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-            <AboutContent />
-          </div>
-        </Section>
-      )
-    }
+      {
+        skills && (
+          <Section
+            id="skills"
+            index="04"
+            eyebrow="Capabilities"
+            title="The toolkit follows the problem."
+            lead="A focused view of the languages, platforms, and protocols I use to move from design to production."
+          >
+            <div class="skills-grid">
+              {skills.data.groups.map((group) => (
+                <div class="skill-group">
+                  <h3>{group.name}</h3>
+                  <p>{group.items.join(' · ')}</p>
+                </div>
+              ))}
+            </div>
 
-    <Section id="experience" title="Experience">
-      <div class="space-y-12">
-        {
-          experience.map((job) => (
-            <article id={slugify(job.data.company)} class="scroll-mt-20">
-              <div class="flex flex-wrap items-baseline justify-between gap-x-4">
-                <h3 class="text-lg font-medium text-slate-900 dark:text-white">
-                  {job.data.company}
-                </h3>
-                <span class="text-xs tabular-nums text-slate-400 dark:text-slate-500">
-                  {job.data.start} — {job.data.end}
-                </span>
+            {SkillsContent && (
+              <div class="prose skills-note">
+                <SkillsContent />
               </div>
-              <p class="text-sm text-slate-500 dark:text-slate-400">{job.data.role}</p>
-              <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {job.data.summary}
-              </p>
+            )}
 
-              <div class="mt-6 space-y-5 border-l border-slate-200 pl-5 dark:border-slate-800">
-                {job.data.highlights.map((h) => (
-                  <div id={slugify(h.name)} class="scroll-mt-20">
-                    <h4 class="text-sm font-medium text-slate-800 dark:text-slate-200">{h.name}</h4>
-                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                      {h.detail}
-                    </p>
-                    {h.tech.length > 0 && (
-                      <ul class="mt-2 flex flex-wrap gap-1.5">
-                        {h.tech.map((t) => (
-                          <li class="rounded border border-slate-200 px-1.5 py-0.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                            {t}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+            <div class="credentials-grid">
+              <div class="credential-block">
+                <p class="eyebrow">Credentials</p>
+                {certifications.map((certification) => (
+                  <div>
+                    <h3>
+                      {certification.data.url ? (
+                        <a href={certification.data.url}>{certification.data.name}</a>
+                      ) : (
+                        certification.data.name
+                      )}
+                    </h3>
+                    <p>{certification.data.issuer}</p>
+                    <span>{certification.data.date}</span>
                   </div>
                 ))}
               </div>
-            </article>
-          ))
-        }
-      </div>
-    </Section>
 
-    {
-      stories.length > 0 && (
-        <Section
-          id="stories"
-          title="Case studies"
-          lead="Longer write-ups of the work above — the constraints, what was rejected, and what it cost."
-        >
-          <ul class="space-y-1">
-            {stories.map((s) => (
-              <li>
-                <a
-                  href={`/stories/${s.id}/`}
-                  class="-mx-3 block rounded-lg px-3 py-3 transition hover:bg-slate-50 dark:hover:bg-slate-900"
-                >
-                  <h3 class="text-sm font-medium text-slate-900 dark:text-white">{s.data.title}</h3>
-                  <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    {s.data.blurb}
-                  </p>
-                  <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
-                    {s.data.domain.join(' · ')}
-                  </p>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )
-    }
-
-    <Section id="projects" title="Projects">
-      <div class="grid gap-4 sm:grid-cols-2">
-        {
-          projects.map((p) => (
-            <a
-              href={`/projects/${p.id}/`}
-              class="overflow-hidden rounded-xl border border-slate-200 transition hover:border-slate-400 dark:border-slate-800 dark:hover:border-slate-600"
-            >
-              <div class="aspect-[16/9] w-full overflow-hidden border-b border-slate-200 dark:border-slate-800">
-                <ProjectCover cover={p.data.cover} title={p.data.title} />
+              <div class="credential-block">
+                <p class="eyebrow">Education</p>
+                {education.map((entry) => (
+                  <div>
+                    <h3>{entry.data.institution}</h3>
+                    <p>{entry.data.degree}</p>
+                    <span>
+                      {entry.data.start} — {entry.data.end}
+                      {entry.data.location && ` · ${entry.data.location}`}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <div class="p-5">
-                <h3 class="font-medium text-slate-900 dark:text-white">{p.data.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  {p.data.blurb}
-                </p>
-                <ul class="mt-3 flex flex-wrap gap-1.5">
-                  {p.data.stack.map((s) => (
-                    <li class="rounded border border-slate-200 px-1.5 py-0.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                      {s}
-                    </li>
+            </div>
+
+            {renderedInterests.length > 0 && (
+              <div class="interests">
+                <p class="eyebrow">Away from the terminal</p>
+                <div class="interests__grid">
+                  {renderedInterests.map(({ interest, Content }) => (
+                    <div>
+                      <span aria-hidden="true">{interest.data.icon}</span>
+                      <h3>{interest.data.title}</h3>
+                      <div class="prose"><Content /></div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
-            </a>
-          ))
-        }
-      </div>
-    </Section>
-
-    {
-      skills && (
-        <Section id="skills" title="Skills">
-          <dl class="space-y-5">
-            {skills.data.groups.map((g) => (
-              <div class="grid gap-1 sm:grid-cols-[10rem_1fr] sm:gap-4">
-                <dt class="text-sm font-medium text-slate-800 dark:text-slate-200">{g.name}</dt>
-                <dd class="text-sm text-slate-600 dark:text-slate-400">{g.items.join(' · ')}</dd>
-              </div>
-            ))}
-          </dl>
-        </Section>
-      )
-    }
-
-    <Section id="certifications" title="Certifications">
-      <ul class="space-y-4">
-        {
-          certifications.map((c) => (
-            <li class="flex flex-wrap items-baseline justify-between gap-x-4">
-              <div>
-                <p class="text-sm font-medium text-slate-900 dark:text-white">{c.data.name}</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  {c.data.issuer}
-                  {c.data.credentialId && ` · ${c.data.credentialId}`}
-                </p>
-              </div>
-              <span class="text-xs tabular-nums text-slate-400 dark:text-slate-500">
-                {c.data.date}
-              </span>
-            </li>
-          ))
-        }
-      </ul>
-    </Section>
-
-    <Section id="education" title="Education">
-      <ul class="space-y-4">
-        {
-          education.map((e) => (
-            <li class="flex flex-wrap items-baseline justify-between gap-x-4">
-              <div>
-                <p class="text-sm font-medium text-slate-900 dark:text-white">
-                  {e.data.institution}
-                </p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">{e.data.degree}</p>
-              </div>
-              <span class="text-xs tabular-nums text-slate-400 dark:text-slate-500">
-                {e.data.start} — {e.data.end}
-              </span>
-            </li>
-          ))
-        }
-      </ul>
-    </Section>
-
-    {
-      interests.length > 0 && (
-        <Section id="interests" title="Interests">
-          <div class="grid gap-4 sm:grid-cols-2">
-            {interests.map((i) => (
-              <div class="rounded-xl border border-slate-200 p-5 dark:border-slate-800">
-                <h3 class="text-sm font-medium text-slate-900 dark:text-white">
-                  {i.data.icon && <span class="mr-1.5">{i.data.icon}</span>}
-                  {i.data.title}
-                </h3>
-                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{i.data.label}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )
-    }
+            )}
+          </Section>
+        )
+      }
+    </div>
   </main>
-
 </Layout>

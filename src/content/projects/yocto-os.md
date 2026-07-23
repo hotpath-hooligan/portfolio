@@ -5,7 +5,7 @@ blurb: >-
   terminal, serial diagnostics, and an allocation-free command prompt.
 stack: [C, x86 Assembly, Operating Systems, QEMU]
 repo: https://github.com/hotpath-hooligan/yocto_os
-order: 2
+order: 6
 ---
 
 Yocto OS is a small 32-bit x86 kernel written in C and assembly. It boots through

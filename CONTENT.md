@@ -4,18 +4,8 @@ Everything on the site comes from Markdown in `src/content/`. Edit a file, run
 `npm run dev`, and the page updates.
 
 **The `draft` flag.** Every entry supports `draft: true`. A draft is excluded
-from the site *and* from the chat index, so half-written notes can sit in the
-repo without the assistant quoting them as fact. Delete the line to publish.
-
-**After editing, always redeploy the backend:**
-
-```bash
-make deploy   # rebuilds the chat's search index from your content
-```
-
-The chat's index is built from this content and baked into the backend image,
-so the assistant keeps answering from the old content until you redeploy. The
-site itself updates on its own build.
+from the site, so half-written notes can sit in the repo. Delete the line to
+publish.
 
 ---
 
@@ -34,7 +24,7 @@ order: 2 # higher = listed first
 summary: >-
   One or two sentences on what you owned there.
 highlights:
-  - name: Remote Connect # becomes its own anchor + chat citation
+  - name: Remote Connect # becomes its own anchor
     detail: >-
       What you built, at what scale, and what you decided.
     tech: [Apache Guacamole, SSH, RDP]
@@ -42,50 +32,11 @@ highlights:
 Optional prose below the frontmatter — context about the org or the constraints.
 ```
 
-Each `highlights` entry becomes a **separately retrievable chunk**, so the chat
-can answer "tell me about Remote Connect" with just that project instead of your
-whole tenure. Split your work into named workstreams rather than a flat bullet
-list — it measurably improves the answers.
+Split work into named highlights rather than a flat bullet list so visitors can
+scan the role quickly and link directly to each workstream.
 
 Write `detail` with concrete numbers ("10,000+ concurrent sessions",
-"sub-5-second"). Retrieval and the model both do better with specifics, and so
-do human readers.
-
-## Case studies — `src/content/stories/*.md`
-
-Long-form write-ups of the work in `experience`. One file per system, rendered at
-`/stories/<filename>/`.
-
-```yaml
----
-title: Replacing a Shared Read Dependency With Event-Driven Materialized Views
-blurb: >-
-  One or two sentences. Shown in the list and used as the page description.
-role: What you personally owned, in one clause.
-domain: [Kafka, Redis, Lua] # chips, and indexed
-highlight: Core Facts # optional: links to that experience highlight
-order: 90 # higher = listed first
----
-## The problem
-## The design
-## Tradeoffs
-```
-
-**Every `##` heading becomes its own chunk.** That is the whole point: "what
-were the tradeoffs on X" retrieves the tradeoffs section, not the entire case
-study. Write headings as the questions people actually ask — *The problem*,
-*What shipped*, *Tradeoffs*, *What I'd fix first* — and keep sections to a few
-paragraphs each.
-
-`highlight` must match a `highlights[].name` in an `experience` entry exactly;
-it renders as a link back to that anchor on the home page.
-
-**Before adding one, read it as a stranger would.** These are the most detailed
-pages on the site and the easiest place to leak an employer's internals. No
-internal service or product codenames, no repository paths, no version
-identifiers, no unreleased roadmap. Describe the systems problem, not the
-company's system. Numbers need to be ones you could defend publicly — order-of-
-magnitude scale is fine, an internal SLO is not.
+"sub-5-second"). Specifics are easier for readers to understand and verify.
 
 ## Projects — `src/content/projects/*.md`
 
@@ -110,8 +61,7 @@ that shows how you think.
 
 ## Skills — `src/content/skills/index.md`
 
-A single file. Each group becomes its own chunk, so "what databases does he
-know" retrieves just that row instead of the whole matrix.
+A single file containing the grouped skills matrix.
 
 ```yaml
 ---
@@ -125,8 +75,7 @@ groups:
 Optional prose on where your strengths actually are.
 ```
 
-Keep groups to 6–10 items. A 40-item list reads as a keyword dump and dilutes
-retrieval.
+Keep groups to 6–10 items. A 40-item list reads as a keyword dump.
 
 ## Education — `src/content/education/*.md`
 
@@ -157,9 +106,8 @@ Optional: what the cert actually covers.
 
 ## About — `src/content/about/index.md`
 
-The published About entry gives both the page and the chat a concise answer to
-"tell me about yourself." Keep it focused on the engineering through-line and
-the kinds of problems you want to work on; resume bullets belong in Experience.
+Keep the About entry focused on the engineering through-line and the kinds of
+problems you want to work on; resume bullets belong in Experience.
 
 ```yaml
 ---
@@ -190,9 +138,7 @@ A short paragraph.
 ```
 
 Specific beats generic. "I have a soft spot for 6502-era hardware, which is how
-the NES emulator started" is worth reading; "I enjoy technology" is not. These
-become their own chat chunks — they're what lets the assistant answer the
-non-work questions.
+the NES emulator started" is worth reading; "I enjoy technology" is not.
 
 ---
 
@@ -213,16 +159,9 @@ links:
     url: https://github.com/...
   - label: LinkedIn
     url: https://www.linkedin.com/in/...
-avatar: ../../assets/avatar.glb # optional, see below
 ---
-Prose here is indexed for the chat but not rendered — a good place to say how
-you prefer to be reached, or that you're open to opportunities.
+Prose below this frontmatter is currently not rendered.
 ```
-
-This is also what lets the chat answer "how do I contact him?" and "who is
-Aryan Kapoor?" — details living only in page markup never reach the index.
-
----
 
 ## Images
 
@@ -250,28 +189,3 @@ gallery:
 
 Source images want to be ~1600px wide; Astro downsizes from there. Use PNG for
 UI screenshots, JPG for photos. A wrong path fails the **build**, not the page.
-
-## 3D avatar
-
-`src/assets/avatar.glb` currently holds a **placeholder** — the CC0
-"RobotExpressive" model from the three.js examples. Replace it with your own
-and the hero picks it up automatically.
-
-The easiest route to a real one: [Ready Player Me](https://readyplayer.me)
-makes a rigged avatar from a selfie and exports `.glb` free. Drop the export at
-`src/assets/avatar.glb`, or point `avatar:` in the profile at any other path
-under `src/assets/`.
-
-Keep it **under ~3 MB** — it's on top of ~180 KB (gzipped) of three.js. If you
-export from Blender, decimate the mesh and bake textures to 1K first.
-
-The component handles the rest: it normalises any model to a consistent size,
-plays an idle animation if the file has one, and turns the model toward the
-cursor. Remove the `avatar:` line to drop 3D entirely; the hero just renders
-without it.
-
-**It is deliberately not loaded for everyone.** three.js and the model are
-dynamically imported only when the hero scrolls into view, and skipped
-completely for `prefers-reduced-motion` users and devices reporting ≤2 CPU
-cores. Rendering pauses when the avatar is off-screen rather than spinning the
-GPU for the whole session.

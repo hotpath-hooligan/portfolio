@@ -5,6 +5,7 @@ blurb: >-
   set — and every service has to deploy identically into all of them.
 role: Owned service infrastructure delivery into the shard fleet; wired dependencies, state, and capacity across environments.
 domain: [Terraform, Terragrunt, Kubernetes, AWS, Helm]
+highlight: Regional Stack Sharding
 order: 55
 ---
 

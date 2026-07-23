@@ -6,7 +6,7 @@ blurb: >-
 stack: [Python, Pygame, WebAssembly, Game AI]
 repo: https://github.com/hotpath-hooligan/Pixel_Souls
 demo: https://hotpath-hooligan.github.io/Pixel_Souls/
-order: 1
+order: 5
 ---
 
 A 2D dungeon crawler built with Python and Pygame. It has three increasingly

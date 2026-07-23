@@ -1,3 +1,0 @@
-# Only needed locally, to run `modal deploy`. Every other dependency is
-# declared in app.py and installed into the Modal images.
-modal>=1.0

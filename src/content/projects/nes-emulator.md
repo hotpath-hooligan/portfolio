@@ -6,7 +6,7 @@ stack: [Go, WebAssembly, Emulation, Ebitengine]
 repo: https://github.com/hotpath-hooligan/nes-emu
 demo: https://hotpath-hooligan.github.io/nes-emu/
 featured: true
-order: 3
+order: 7
 ---
 
 A Nintendo Entertainment System emulator written in Go with a platform-neutral
