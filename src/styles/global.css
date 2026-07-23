@@ -1562,43 +1562,6 @@ summary {
   font-size: 0.7rem;
 }
 
-/* Form confirmation */
-
-.confirmation-page {
-  display: grid;
-  width: min(100% - 3rem, 1180px);
-  min-height: 65vh;
-  place-items: center start;
-  margin-inline: auto;
-  padding-block: clamp(6rem, 13vw, 11rem);
-}
-
-.confirmation-page > section {
-  max-width: 48rem;
-}
-
-.confirmation-page h1 {
-  margin: 1rem 0 0;
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: clamp(3.6rem, 8vw, 7rem);
-  font-weight: 400;
-  letter-spacing: -0.065em;
-  line-height: 0.92;
-}
-
-.confirmation-page section > p:not(.eyebrow) {
-  max-width: 36rem;
-  margin: 1.5rem 0 0;
-  color: var(--muted-strong);
-  font-size: 1rem;
-  line-height: 1.75;
-}
-
-.confirmation-page .button {
-  margin-top: 2rem;
-}
-
 /* Footer */
 
 .site-footer {
@@ -1613,10 +1576,7 @@ summary {
 }
 
 .footer-contact {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.78fr);
-  align-items: start;
-  gap: clamp(3rem, 8vw, 8rem);
+  max-width: 780px;
 }
 
 .footer-cta {
@@ -1694,138 +1654,6 @@ summary {
 
 .contact-channel:hover i {
   transform: translate(0.2rem, -0.2rem);
-}
-
-.callback-panel {
-  padding: clamp(1.4rem, 3vw, 2.25rem);
-  border: 1px solid #363c35;
-  background: #20251f;
-  color-scheme: dark;
-}
-
-.callback-panel > .eyebrow {
-  color: #86c89c;
-}
-
-.callback-panel h3 {
-  margin: 0.8rem 0 0;
-  color: #f3f1e9;
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3.1rem);
-  font-weight: 400;
-  letter-spacing: -0.05em;
-  line-height: 1;
-}
-
-.callback-panel > p:not(.eyebrow) {
-  margin: 1rem 0 0;
-  color: #9da49a;
-  font-size: 0.82rem;
-  line-height: 1.6;
-}
-
-.callback-form {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1.75rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.form-field {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.form-field > span {
-  color: #b8beb4;
-  font-family: var(--font-mono);
-  font-size: 0.61rem;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.form-field em {
-  margin-left: 0.3rem;
-  color: #70786e;
-  font-size: 0.54rem;
-  font-style: normal;
-  font-weight: 500;
-}
-
-.form-field input,
-.form-field textarea {
-  width: 100%;
-  min-width: 0;
-  min-height: 3.15rem;
-  padding: 0.78rem 0.85rem;
-  border: 1px solid #4b5249;
-  border-radius: 0;
-  background: #111410;
-  color: #f3f1e9;
-  font: inherit;
-  font-size: 0.82rem;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease;
-}
-
-.form-field textarea {
-  min-height: 7rem;
-  resize: vertical;
-}
-
-.form-field input::placeholder,
-.form-field textarea::placeholder {
-  color: #6f776d;
-  opacity: 1;
-}
-
-.form-field input:hover,
-.form-field textarea:hover,
-.form-field input:focus,
-.form-field textarea:focus {
-  border-color: #86c89c;
-  background: #151a14;
-}
-
-.callback-form__actions {
-  display: grid;
-  justify-items: start;
-  gap: 0.85rem;
-  margin-top: 0.35rem;
-}
-
-.callback-form__actions > p {
-  max-width: 28rem;
-  margin: 0;
-  color: #7f877d;
-  font-size: 0.63rem;
-  line-height: 1.55;
-}
-
-.callback-form__actions > p a {
-  border-bottom: 1px solid #4b5249;
-  color: #abb1a7;
-}
-
-.callback-form__actions > p a:hover {
-  border-color: #86c89c;
-  color: #f3f1e9;
-}
-
-.form-honeypot {
-  position: fixed;
-  top: -100vh;
-  left: -100vw;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
 }
 
 .footer-meta {
@@ -1906,14 +1734,6 @@ summary {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .footer-contact {
-    grid-template-columns: 1fr;
-  }
-
-  .callback-panel {
-    width: min(100%, 46rem);
-  }
-
   .footer-meta {
     grid-template-columns: 1fr auto;
   }
@@ -1927,8 +1747,7 @@ summary {
   .site-header__inner,
   .hero,
   .page-shell,
-  .detail-main,
-  .confirmation-page {
+  .detail-main {
     width: min(100% - 2rem, 1180px);
   }
 
@@ -2091,10 +1910,6 @@ summary {
     font-size: 0.98rem;
   }
 
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
   .footer-meta {
     grid-template-columns: 1fr;
     align-items: start;
@@ -2113,14 +1928,6 @@ summary {
   }
 
   .hero__actions .button {
-    width: 100%;
-  }
-
-  .callback-panel {
-    padding: 1.25rem;
-  }
-
-  .callback-form__actions .button {
     width: 100%;
   }
 

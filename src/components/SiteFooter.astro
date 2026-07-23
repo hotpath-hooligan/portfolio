@@ -13,9 +13,6 @@ interface Props {
 const { name, email, links = [] } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const year = new Date().getFullYear();
-const callbackEndpoint = email ? `https://formsubmit.co/${email}` : undefined;
-const portfolioUrl = new URL(base, Astro.site ?? Astro.url).href;
-const callbackConfirmationUrl = new URL(`${base}thanks/`, Astro.site ?? Astro.url).href;
 
 const displayUrl = (url: string) => {
   const parsed = new URL(url);
@@ -30,8 +27,8 @@ const displayUrl = (url: string) => {
         <p class="eyebrow">Contact / 05</p>
         <h2 id="contact-title">Let’s start a conversation.</h2>
         <p>
-          Have a role, project, or software problem in mind? Reach out directly or
-          leave your number and I’ll get back to you.
+          Have a role, project, or software problem in mind? Send me an email or
+          connect with me on GitHub and LinkedIn.
         </p>
 
         <div class="contact-channels" aria-label="Contact links">
@@ -55,105 +52,6 @@ const displayUrl = (url: string) => {
           }
         </div>
       </div>
-
-      {
-        callbackEndpoint && (
-          <div class="callback-panel">
-            <p class="eyebrow">Request a callback</p>
-            <h3>Leave your number.</h3>
-            <p>I’ll use these details only to respond to your request.</p>
-
-            <form
-              id="callback-form"
-              class="callback-form"
-              action={callbackEndpoint}
-              method="POST"
-            >
-              <input type="hidden" name="_subject" value="New portfolio callback request" />
-              <input type="hidden" name="_template" value="table" />
-              <input type="hidden" name="_next" value={callbackConfirmationUrl} />
-              <input type="hidden" name="_url" value={portfolioUrl} />
-
-              <label class="form-honeypot" aria-hidden="true">
-                Leave this field empty
-                <input name="_honey" type="text" tabindex="-1" autocomplete="off" />
-              </label>
-
-              <div class="form-row">
-                <label class="form-field" for="callback-name">
-                  <span>Name</span>
-                  <input
-                    id="callback-name"
-                    name="Name"
-                    type="text"
-                    autocomplete="name"
-                    placeholder="Your name"
-                    required
-                  />
-                </label>
-
-                <label class="form-field" for="callback-phone">
-                  <span>Contact number</span>
-                  <input
-                    id="callback-phone"
-                    name="Contact number"
-                    type="tel"
-                    inputmode="tel"
-                    autocomplete="tel"
-                    placeholder="Include country code"
-                    required
-                  />
-                </label>
-              </div>
-
-              <div class="form-row">
-                <label class="form-field" for="callback-email">
-                  <span>Email <em>Optional</em></span>
-                  <input
-                    id="callback-email"
-                    name="email"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="you@example.com"
-                  />
-                </label>
-
-                <label class="form-field" for="callback-time">
-                  <span>Best time to call <em>Optional</em></span>
-                  <input
-                    id="callback-time"
-                    name="Best time to call"
-                    type="text"
-                    placeholder="Time and timezone"
-                  />
-                </label>
-              </div>
-
-              <label class="form-field" for="callback-message">
-                <span>What would you like to discuss? <em>Optional</em></span>
-                <textarea
-                  id="callback-message"
-                  name="Message"
-                  rows="4"
-                  placeholder="A role, project, or quick introduction"
-                ></textarea>
-              </label>
-
-              <div class="callback-form__actions">
-                <button class="button button--light" type="submit">
-                  Request a callback
-                  <span aria-hidden="true">↗</span>
-                </button>
-                <p>
-                  By submitting, you agree to be contacted about this request.
-                  Delivery is handled by
-                  <a href="https://formsubmit.co/privacy">FormSubmit</a>.
-                </p>
-              </div>
-            </form>
-          </div>
-        )
-      }
     </section>
 
     <div class="footer-meta">
