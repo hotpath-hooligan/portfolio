@@ -23,6 +23,7 @@ const profile = defineCollection({
     tagline: z.string(),
     location: z.string().optional(),
     email: z.string().optional(),
+    phone: z.string().optional(),
     links: z
       .array(z.object({ label: z.string(), url: z.string().url() }))
       .default([]),

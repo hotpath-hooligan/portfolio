@@ -6,6 +6,7 @@ tagline: >-
   delivery, and the networking underneath all of it.
 location: Bangalore, India
 email: aryan.kapoor.me@gmail.com
+phone: +91 9504638049
 links:
   - label: GitHub
     url: https://github.com/hotpath-hooligan
@@ -13,5 +14,5 @@ links:
     url: https://www.linkedin.com/in/akap
 ---
 
-Reachable by email or on LinkedIn. Based in Bangalore, India, and open to
+Reachable by phone, email, or on LinkedIn. Based in Bangalore, India, and open to
 conversations about backend and distributed systems work.

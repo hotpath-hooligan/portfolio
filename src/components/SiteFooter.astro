@@ -7,12 +7,14 @@ interface Link {
 interface Props {
   name: string;
   email?: string;
+  phone?: string;
   links?: Link[];
 }
 
-const { name, email, links = [] } = Astro.props;
+const { name, email, phone, links = [] } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const year = new Date().getFullYear();
+const phoneHref = phone?.replace(/[^\d+]/g, '');
 
 const displayUrl = (url: string) => {
   const parsed = new URL(url);
@@ -27,8 +29,8 @@ const displayUrl = (url: string) => {
         <p class="eyebrow">Contact / 05</p>
         <h2 id="contact-title">Let’s start a conversation.</h2>
         <p>
-          Have a role, project, or software problem in mind? Send me an email or
-          connect with me on GitHub and LinkedIn.
+          Have a role, project, or software problem in mind? Call me, send me an
+          email, or connect with me on GitHub and LinkedIn.
         </p>
 
         <div class="contact-channels" aria-label="Contact links">
@@ -50,6 +52,15 @@ const displayUrl = (url: string) => {
               </a>
             )
           }
+          {
+            phone && (
+              <a class="contact-channel" href={`tel:${phoneHref}`}>
+                <span>Phone</span>
+                <strong>{phone}</strong>
+                <i aria-hidden="true">↗</i>
+              </a>
+            )
+          }
         </div>
       </div>
     </section>
@@ -66,6 +77,7 @@ const displayUrl = (url: string) => {
       <div class="footer-links">
         {links.map((link) => <a href={link.url} rel="me">{link.label}</a>)}
         {email && <a href={`mailto:${email}`}>Email</a>}
+        {phone && <a href={`tel:${phoneHref}`}>Phone</a>}
       </div>
 
       <p>© {year} {name}. Built with Astro.</p>

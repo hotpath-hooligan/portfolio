@@ -154,6 +154,7 @@ tagline: >-
   One or two lines under your name.
 location: Bangalore, India
 email: you@example.com
+phone: +91 9504638049
 links:
   - label: GitHub
     url: https://github.com/...
